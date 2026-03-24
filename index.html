@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>FlowBoard — Planner + Kanban</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --bg:#0d0d0d; --surface:#161616; --surface2:#1e1e1e; --border:#2a2a2a;
@@ -29,7 +30,14 @@
     color:var(--muted);font-family:var(--font-ui);font-size:0.8rem;cursor:pointer;transition:var(--transition);}
   .btn-sm:hover{border-color:var(--accent);color:var(--accent);}
 
-  main{padding:24px 28px;}
+  /*
+    CAMBIO: Estilos para el botón de cerrar sesión
+    FECHA: 24/05/2024
+  */
+  .btn-logout{background-color: var(--accent2); color: white; border: none;}
+  .btn-logout:hover{background-color: #ff4500;}
+
+  main{padding:24px 28px; display: none;} /* Oculto por defecto hasta el login */
   .view{display:none;}
   .view.active{display:block;animation:fadeIn 0.2s ease;}
   @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
@@ -164,9 +172,50 @@
   ::-webkit-scrollbar{width:6px;}
   ::-webkit-scrollbar-track{background:var(--bg);}
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  /*
+    CAMBIO: Estilos para la pantalla de Auth (Login)
+    FECHA: 24/05/2024
+  */
+  .auth-overlay{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px;width:360px;max-width:100%;text-align:center;}
+  .auth-box .logo{font-size:2rem;margin-bottom:24px;}
+  .auth-form{display:flex;flex-direction:column;gap:12px;}
+  .auth-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:var(--radius);font-family:var(--font-ui);outline:none;}
+  .auth-input:focus{border-color:var(--accent);}
+  .btn-auth{padding:12px;background:var(--accent);color:#000;border:none;border-radius:var(--radius);font-weight:700;cursor:pointer;font-family:var(--font-ui);transition:var(--transition);margin-top:8px;}
+  .btn-auth:hover{background:#ffd060;}
+  .auth-switch{font-size:0.85rem;color:var(--muted);margin-top:16px;}
+  .auth-switch a{color:var(--accent);text-decoration:none;font-weight:600;cursor:pointer;}
 </style>
 </head>
 <body>
+
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <div class="logo">Flow<span>Board</span></div>
+    
+    <div id="loginForm">
+      <h3 style="margin-bottom:16px; font-family:var(--font-mono);">Iniciar Sesión</h3>
+      <form class="auth-form" onsubmit="handleLogin(event)">
+        <input type="email" id="loginEmail" class="auth-input" placeholder="Tu email" required>
+        <input type="password" id="loginPassword" class="auth-input" placeholder="Tu contraseña" required>
+        <button type="submit" class="btn-auth">Entrar</button>
+      </form>
+      <div class="auth-switch">¿No tienes cuenta? <a onclick="toggleAuthForms()">Regístrate</a></div>
+    </div>
+
+    <div id="registerForm" style="display:none;">
+      <h3 style="margin-bottom:16px; font-family:var(--font-mono);">Crear Cuenta</h3>
+      <form class="auth-form" onsubmit="handleRegister(event)">
+        <input type="email" id="registerEmail" class="auth-input" placeholder="Tu email" required>
+        <input type="password" id="registerPassword" class="auth-input" placeholder="Crea una contraseña" required>
+        <button type="submit" class="btn-auth">Registrarse</button>
+      </form>
+      <div class="auth-switch">¿Ya tienes cuenta? <a onclick="toggleAuthForms()">Inicia sesión</a></div>
+    </div>
+  </div>
+</div>
 
 <header>
   <div class="logo">Flow<span>Board</span></div>
@@ -178,10 +227,11 @@
   <div class="header-actions">
     <button class="btn-sm" onclick="clearDone()">Limpiar hechas</button>
     <button class="btn-sm" onclick="exportData()">Exportar JSON</button>
+    <button class="btn-sm btn-logout" onclick="handleLogout()">Salir</button>
   </div>
 </header>
 
-<main>
+<main id="appMain">
   <div class="add-bar">
     <input type="text" id="taskInput" placeholder="Nueva tarea…" onkeydown="if(event.key==='Enter') addTask()"/>
     <select id="tagSelect">
@@ -202,7 +252,6 @@
 
   <div class="stats-bar" id="statsBar"></div>
 
-  <!-- WEEKLY -->
   <div class="view active" id="view-weekly">
     <div class="period-nav">
       <button class="nav-btn" onclick="changeWeek(-1)">&#8249;</button>
@@ -213,7 +262,6 @@
     <div class="week-grid" id="weekGrid"></div>
   </div>
 
-  <!-- MONTHLY -->
   <div class="view" id="view-monthly">
     <div class="period-nav">
       <button class="nav-btn" onclick="changeMonth(-1)">&#8249;</button>
@@ -224,7 +272,6 @@
     <div class="month-grid" id="monthGrid"></div>
   </div>
 
-  <!-- DAY MODAL -->
   <div class="modal-overlay" id="modalOverlay" onclick="closeModalBg(event)">
     <div class="modal">
       <div class="modal-header">
@@ -239,7 +286,6 @@
     </div>
   </div>
 
-  <!-- KANBAN -->
   <div class="view" id="view-kanban">
     <div class="kanban-grid">
       <div class="kanban-col col-todo" ondragover="dragOver(event,'todo')" ondragleave="dragLeave(event)" ondrop="drop(event,'todo','kanban')">
@@ -263,7 +309,19 @@
 </main>
 
 <script>
-let tasks = JSON.parse(localStorage.getItem('flowboard_tasks') || '[]');
+/**
+ * CAMBIO: Configuración inicial de Supabase y variables globales
+ * FECHA: 24/05/2024
+ */
+const SUPABASE_URL = 'TU_URL_DE_SUPABASE'; // <--- REEMPLAZA ESTO
+const SUPABASE_KEY = 'TU_KEY_ANONIMA';     // <--- REEMPLAZA ESTO
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Usuario actual (se llena al hacer login)
+let currentUser = null;
+// Ya no usamos localStorage por defecto, iniciamos array vacío
+let tasks = []; 
+
 let weekOffset = 0, monthOffset = 0, dragId = null, modalDay = null;
 
 const DAYS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
@@ -271,7 +329,87 @@ const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Ago
 const STATUS_LABELS = {todo:'Por hacer',inprogress:'En progreso',review:'En revisión',done:'Hecho'};
 const TAG_LABELS = {work:'💼 Trabajo',personal:'🎯 Personal',urgent:'🔥 Urgente',idea:'💡 Idea'};
 
-function save(){ localStorage.setItem('flowboard_tasks', JSON.stringify(tasks)); }
+/**
+ * CAMBIO: Funciones de Lógica de Autenticación
+ * FECHA: 24/05/2024
+ */
+
+// Alternar entre formularios de Login y Registro
+function toggleAuthForms() {
+  const loginF = document.getElementById('loginForm');
+  const registerF = document.getElementById('registerForm');
+  if (loginF.style.display === 'none') {
+    loginF.style.display = 'block';
+    registerF.style.display = 'none';
+  } else {
+    loginF.style.display = 'none';
+    registerF.style.display = 'block';
+  }
+}
+
+// Mostrar la App y ocultar Login
+function showApp(user) {
+  currentUser = user;
+  document.getElementById('authOverlay').style.display = 'none';
+  document.getElementById('appMain').style.display = 'block';
+  updateDaySelect();
+  render(); // Cargar y dibujar tareas
+}
+
+// Mostrar Login y ocultar App
+function showAuth() {
+  currentUser = null;
+  tasks = [];
+  document.getElementById('authOverlay').style.display = 'flex';
+  document.getElementById('appMain').style.display = 'none';
+}
+
+// Manejar Registro
+async function handleRegister(e) {
+  e.preventDefault();
+  const email = document.getElementById('registerEmail').value;
+  const password = document.getElementById('registerPassword').value;
+
+  const { data, error } = await _supabase.auth.signUp({ email, password });
+
+  if (error) {
+    alert('Error en el registro: ' + error.message);
+  } else {
+    alert('Registro exitoso. Revisa tu email para confirmar (si está activado en Supabase) o inicia sesión.');
+    toggleAuthForms();
+  }
+}
+
+// Manejar Login
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+
+  const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    alert('Error de login: ' + error.message);
+  } else {
+    showApp(data.user);
+  }
+}
+
+// Manejar Cerrar Sesión
+async function handleLogout() {
+  const { error } = await _supabase.auth.signOut();
+  if(!error) showAuth();
+}
+
+/**
+ * CAMBIO: Modificación de la lógica de Persistencia (de localStorage a Supabase)
+ * FECHA: 24/05/2024
+ */
+
+// ANTES: function save(){ localStorage.setItem('flowboard_tasks', JSON.stringify(tasks)); }
+// AHORA: Ya no necesitamos save() global, guardamos en cada acción (add, update, delete)
+function save(){ console.warn('save() local desactivado, usando DB'); }
+
 function dateKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function isToday(d){ return dateKey(d)===dateKey(new Date()); }
 
@@ -304,18 +442,70 @@ function updateDaySelect(){
   });
 }
 
-function addTask(){
+/**
+ * CAMBIO: Modificar addTask para insertar en Supabase
+ * FECHA: 24/05/2024
+ */
+async function addTask(){
   const text=document.getElementById('taskInput').value.trim();
   if(!text){document.getElementById('taskInput').focus();return;}
-  tasks.unshift({id:Date.now()+Math.random(),text,
+  if(!currentUser) return; // Seguridad
+
+  const nuevaTareaLocal = {
+    // El ID real lo dará la DB (uuid), usamos provisional para optimismo visual si quisieras
+    text,
     tag:document.getElementById('tagSelect').value,
     status:document.getElementById('statusSelect').value,
     day:document.getElementById('daySelect').value,
-    done:false,created:new Date().toISOString()});
-  save(); document.getElementById('taskInput').value=''; render();
+    done:false,
+    // CAMBIO: Asegurarnos de usar los nombres de columna correctos del SQL
+    user_id: currentUser.id
+  };
+
+  // Insertar en Supabase
+  const { data, error } = await _supabase
+    .from('tareas')
+    .insert([nuevaTareaLocal])
+    .select(); // select() devuelve el registro creado incluyendo su ID real
+
+  if (error) {
+    alert('Error al guardar tarea: ' + error.message);
+  } else if(data) {
+    // Añadimos la tarea devuelta por la DB (que ya tiene ID uuid) a nuestro array local
+    tasks.unshift(data[0]); 
+    document.getElementById('taskInput').value=''; 
+    render();
+  }
 }
 
-function render(){ renderStats(); renderWeekly(); renderMonthly(); renderKanban(); }
+/**
+ * CAMBIO: Modificar render para que sea asíncrono y cargue datos de DB
+ * FECHA: 24/05/2024
+ */
+async function render(){ 
+  // Si no hay usuario, no cargamos nada
+  if(!currentUser) return;
+
+  // Si el array tasks está vacío, intentamos cargar de la DB por primera vez
+  if(tasks.length === 0) {
+    const { data, error } = await _supabase
+      .from('tareas')
+      .select('*')
+      .order('inserted_at', { ascending: false }); // Ordenar por creación
+
+    if(error) {
+      console.error('Error cargando tareas:', error);
+    } else if(data) {
+      tasks = data; // Llenamos el array local
+    }
+  }
+
+  // Ejecutamos tus funciones de renderizado originales con los datos actualizados
+  renderStats(); 
+  renderWeekly(); 
+  renderMonthly(); 
+  renderKanban(); 
+}
 
 function renderStats(){
   const tot=tasks.length, done=tasks.filter(t=>t.done||t.status==='done').length,
@@ -369,7 +559,7 @@ function renderMonthly(){
     cell.appendChild(num);
     const pills=document.createElement('div'); pills.className='month-pills';
     const MAX=3;
-    dt.slice(0,MAX).forEach(t=>{
+    dt.slice(0,MAX).forEach(t=> {
       const p=document.createElement('div');
       p.className=`month-pill tag-${t.tag}${t.done?' is-done':''}`;
       p.textContent=t.text; pills.appendChild(p);
@@ -395,18 +585,20 @@ function buildCard(task){
   card.ondragstart=e=>{dragId=task.id;setTimeout(()=>card.classList.add('dragging'),0);e.dataTransfer.effectAllowed='move';};
   card.ondragend=()=>{card.classList.remove('dragging');dragId=null;};
   const opts=Object.entries(STATUS_LABELS).map(([v,l])=>`<option value="${v}"${task.status===v?' selected':''}>${l}</option>`).join('');
+  
+  // CAMBIO: Usar comillas simples para los IDs uuid en onclick, ya que son strings. FECHA: 24/05/2024
   card.innerHTML=`<div class="task-top">
-    <div class="task-check${task.done?' checked':''}" onclick="toggleDone(${task.id})">${task.done?'✓':''}</div>
+    <div class="task-check${task.done?' checked':''}" onclick="toggleDone('${task.id}')">${task.done?'✓':''}</div>
     <span class="task-text">${esc(task.text)}</span>
-    <button class="task-del" onclick="deleteTask(${task.id})">✕</button>
+    <button class="task-del" onclick="deleteTask('${task.id}')">✕</button>
   </div>
   <div class="task-meta">
     <span class="tag tag-${task.tag}">${TAG_LABELS[task.tag]}</span>
-    <select class="status-badge" onchange="changeStatus(${task.id},this.value)">${opts}</select>
+    <select class="status-badge" onchange="changeStatus('${task.id}',this.value)">${opts}</select>
   </div>`;
   return card;
 }
-function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s){ return s? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
 
 // Modal
 function openModal(key,date){
@@ -423,23 +615,120 @@ function renderModalBody(){
   if(!dt.length){body.innerHTML='<div class="modal-empty">Sin tareas este día.<br>¡Añade una abajo!</div>';return;}
   dt.forEach(t=>body.appendChild(buildCard(t)));
 }
-function addTaskFromModal(){
+
+/**
+ * CAMBIO: Modificar addTaskFromModal para Supabase
+ * FECHA: 24/05/2024
+ */
+async function addTaskFromModal(){
   const text=document.getElementById('modalInput').value.trim();
-  if(!text||!modalDay) return;
-  tasks.unshift({id:Date.now()+Math.random(),text,tag:'work',status:'todo',day:modalDay,done:false,created:new Date().toISOString()});
-  save(); render(); renderModalBody(); document.getElementById('modalInput').value='';
+  if(!text||!modalDay||!currentUser) return;
+
+  const nuevaTareaLocal = {
+    text, tag:'work', status:'todo', day:modalDay, done:false,
+    user_id: currentUser.id
+  };
+
+  const { data, error } = await _supabase
+    .from('tareas')
+    .insert([nuevaTareaLocal])
+    .select();
+
+  if(error) {
+    alert('Error al guardar: ' + error.message);
+  } else if(data) {
+    tasks.unshift(data[0]); 
+    render(); 
+    renderModalBody(); 
+    document.getElementById('modalInput').value='';
+  }
 }
 function closeModalBg(e){ if(e.target===document.getElementById('modalOverlay')) closeModalDirect(); }
 function closeModalDirect(){ document.getElementById('modalOverlay').classList.remove('open'); modalDay=null; }
 
 // Actions
-function toggleDone(id){
+
+/**
+ * CAMBIO: Las acciones (toggleDone, deleteTask, changeStatus, clearDone)
+ * ahora actualizan Supabase asíncronamente.
+ * FECHA: 24/05/2024
+ */
+
+async function toggleDone(id){
   const t=tasks.find(t=>t.id==id); if(!t) return;
-  t.done=!t.done; if(t.done) t.status='done'; save(); render(); if(modalDay) renderModalBody();
+  const newDoneState = !t.done;
+  const newStatus = newDoneState ? 'done' : (t.status === 'done' ? 'todo' : t.status);
+
+  // Actualización optimista local
+  t.done = newDoneState;
+  t.status = newStatus;
+  render(); 
+  if(modalDay) renderModalBody();
+
+  // Actualizar DB
+  const { error } = await _supabase
+    .from('tareas')
+    .update({ done: newDoneState, status: newStatus })
+    .eq('id', id);
+
+  if(error) {
+    alert('Error actualizando DB, recarga la página.');
+    console.error(error);
+  }
 }
-function deleteTask(id){ tasks=tasks.filter(t=>t.id!=id); save(); render(); if(modalDay) renderModalBody(); }
-function changeStatus(id,s){ const t=tasks.find(t=>t.id==id); if(!t) return; t.status=s; t.done=s==='done'; save(); render(); if(modalDay) renderModalBody(); }
-function clearDone(){ tasks=tasks.filter(t=>!t.done&&t.status!=='done'); save(); render(); }
+
+async function deleteTask(id){ 
+  // Eliminación optimista local
+  tasks=tasks.filter(t=>t.id!=id); 
+  render(); 
+  if(modalDay) renderModalBody(); 
+
+  // Borrar de DB
+  const { error } = await _supabase
+    .from('tareas')
+    .delete()
+    .eq('id', id);
+  
+  if(error) alert('Error borrando en DB.');
+}
+
+async function changeStatus(id,s){ 
+  const t=tasks.find(t=>t.id==id); if(!t) return; 
+  
+  // Actualización optimista local
+  t.status=s; t.done=s==='done'; 
+  render(); 
+  if(modalDay) renderModalBody(); 
+
+  // Actualizar DB
+  const { error } = await _supabase
+    .from('tareas')
+    .update({ status: s, done: s === 'done' })
+    .eq('id', id);
+  
+  if(error) alert('Error actualizando estado en DB.');
+}
+
+async function clearDone(){ 
+  // Solo tareas que localmente están hechas
+  const tareasABorrar = tasks.filter(t=>t.done||t.status==='done');
+  const idsABorrar = tareasABorrar.map(t=>t.id);
+
+  if(idsABorrar.length === 0) return;
+
+  // Optimista local
+  tasks=tasks.filter(t=>!t.done&&t.status!=='done'); 
+  render(); 
+
+  // Borrar de DB usando 'in' para borrar varios IDs
+  const { error } = await _supabase
+    .from('tareas')
+    .delete()
+    .in('id', idsABorrar);
+  
+  if(error) alert('Error limpiando tareas en DB.');
+}
+
 function exportData(){
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'}));
@@ -463,22 +752,68 @@ function switchView(v,btn){
 // Drag & Drop
 function dragOver(e,t){ e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
 function dragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
-function drop(e,target,ctx){
+
+/**
+ * CAMBIO: drop y dropDay actualizan Supabase
+ * FECHA: 24/05/2024
+ */
+async function drop(e,target,ctx){
   e.preventDefault(); e.currentTarget.classList.remove('drag-over');
   if(dragId===null) return;
   const t=tasks.find(t=>t.id==dragId); if(!t) return;
-  if(ctx==='weekly') t.day=target;
-  else { t.status=target; t.done=target==='done'; }
-  save(); render();
-}
-function dropDay(key){
-  if(dragId===null) return;
-  const t=tasks.find(t=>t.id==dragId); if(!t) return;
-  t.day=key; save(); render();
+  
+  let updateFields = {};
+
+  if(ctx==='weekly') {
+    t.day=target;
+    updateFields = { day: target };
+  } else { 
+    t.status=target; t.done=target==='done'; 
+    updateFields = { status: target, done: t.done };
+  }
+  
+  render(); // Optimista
+
+  const { error } = await _supabase
+    .from('tareas')
+    .update(updateFields)
+    .eq('id', dragId);
+  
+  if(error) alert('Error al mover tarea en DB.');
 }
 
-updateDaySelect();
-render();
+async function dropDay(key){
+  if(dragId===null) return;
+  const t=tasks.find(t=>t.id==dragId); if(!t) return;
+  
+  t.day=key; 
+  render(); // Optimista
+
+  const { error } = await _supabase
+    .from('tareas')
+    .update({ day: key })
+    .eq('id', dragId);
+  
+  if(error) alert('Error al mover tarea en DB.');
+}
+
+/**
+ * CAMBIO: Verificación de sesión inicial al cargar la página
+ * FECHA: 24/05/2024
+ */
+async function checkInitialSession() {
+  const { data: { session }, error } = await _supabase.auth.getSession();
+  
+  if (session) {
+    showApp(session.user);
+  } else {
+    showAuth();
+  }
+}
+
+// Iniciar proceso
+checkInitialSession();
+
 </script>
 </body>
 </html>
