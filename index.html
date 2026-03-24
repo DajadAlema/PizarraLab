@@ -443,9 +443,56 @@ function updateDaySelect(){
 }
 
 /**
+ * CAMBIO: indicador de carga mientras Supabase responde
+ * FECHA: 24/03/2026
+*/
+
+async function addTask(){
+  const btn = document.querySelector('.btn-add');
+  const originalText = btn.textContent;
+  
+  const text=document.getElementById('taskInput').value.trim();
+  if(!text) return;
+
+  // Cambio: Indicador visual de carga
+  btn.textContent = '...';
+  btn.disabled = true;
+
+  try {
+    const nuevaTareaLocal = {
+      text,
+      tag:document.getElementById('tagSelect').value,
+      status:document.getElementById('statusSelect').value,
+      day:document.getElementById('daySelect').value,
+      done:false,
+      user_id: currentUser.id
+    };
+
+    const { data, error } = await _supabase.from('tareas').insert([nuevaTareaLocal]).select();
+
+    if (error) throw error;
+    
+    if(data) {
+      tasks.unshift(data[0]); 
+      document.getElementById('taskInput').value=''; 
+      render();
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    // Restaurar botón
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+
+  
+/**
+13.08  24/03/2026 VERSION ANTERIOR / YA NO FUNCIONAL
+
  * CAMBIO: Modificar addTask para insertar en Supabase
  * FECHA: 24/05/2024
- */
+ 
 async function addTask(){
   const text=document.getElementById('taskInput').value.trim();
   if(!text){document.getElementById('taskInput').focus();return;}
@@ -478,6 +525,7 @@ async function addTask(){
   }
 }
 
+*/
 /**
  * CAMBIO: Modificar render para que sea asíncrono y cargue datos de DB
  * FECHA: 24/05/2024
