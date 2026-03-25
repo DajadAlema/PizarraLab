@@ -77,17 +77,19 @@ function toggleAuthForms() {
   l.style.display = isLogin ? 'none' : 'block';
   r.style.display = isLogin ? 'block' : 'none';
 }
-
+//CAMBIO 25/03/2026 avbx4ch2
 function showApp(user) {
   currentUser = user;
   document.getElementById('authOverlay').style.display = 'none';
   document.getElementById('appMain').style.display = 'block';
   updateDaySelect();
   loadAndRender();
-  // Pedir permiso de notificaciones al entrar
-  if (Notification.permission === 'granted') {
-    updateNotifBtn(true);
-    startNotificationChecker();
+  
+  // CAMBIO: Iniciar notificaciones solo si tienen permiso Y el usuario las dejó prendidas
+  if (Notification.permission === 'granted' && notifsActive) {
+    activateNotifs();
+  } else {
+    updateNotifBtn(false);
   }
 }
 
@@ -596,54 +598,91 @@ function updateDaySelect() {
 // NOTIFICATIONS
 // ═══════════════════════════════════════════════════════════
 
-async function requestNotificationPermission() {
+//-- Cambio para activacion/desactivacion de las notificaciones
+//-- 25/03/2026 avbx4ch2
+
+let notifInterval = null;
+// Leemos si el usuario las tenía activadas en su visita anterior
+let notifsActive = localStorage.getItem('pizarralab_notifs') === 'true';
+
+async function toggleNotifications() {
   if (!('Notification' in window)) {
     showToast('Tu navegador no soporta notificaciones', 'error'); return;
   }
-  if (Notification.permission === 'granted') {
-    showToast('Las notificaciones ya están activas ✓', 'info'); return;
+
+  // Si están activas, las apagamos
+  if (notifsActive) {
+    notifsActive = false;
+    localStorage.setItem('pizarralab_notifs', 'false');
+    if (notifInterval) { clearInterval(notifInterval); notifInterval = null; }
+    updateNotifBtn(false);
+    showToast('Notificaciones silenciadas 🔕', 'info');
+  } 
+  // Si están apagadas, intentamos prenderlas
+  else {
+    if (Notification.permission === 'granted') {
+      activateNotifs();
+      showToast('Notificaciones activadas 🔔', 'success');
+    } else if (Notification.permission !== 'denied') {
+      const result = await Notification.requestPermission();
+      if (result === 'granted') {
+        activateNotifs();
+        showToast('¡Notificaciones activadas! 🔔', 'success');
+      } else {
+        showToast('Permiso de notificaciones denegado', 'error');
+      }
+    } else {
+      showToast('Permiso bloqueado por el navegador', 'error');
+    }
   }
-  const result = await Notification.requestPermission();
-  if (result === 'granted') {
-    updateNotifBtn(true);
-    startNotificationChecker();
-    showToast('¡Notificaciones activadas! 🔔', 'success');
-  } else {
-    showToast('Permiso de notificaciones denegado', 'error');
-  }
+}
+
+function activateNotifs() {
+  notifsActive = true;
+  localStorage.setItem('pizarralab_notifs', 'true');
+  updateNotifBtn(true);
+  startNotificationChecker();
 }
 
 function updateNotifBtn(active) {
   const btn = document.getElementById('notifBtn');
-  if (active) btn.classList.add('active');
-  else        btn.classList.remove('active');
-  btn.title = active ? 'Notificaciones activas' : 'Activar notificaciones';
+  if (active) {
+    btn.classList.add('active');
+    btn.title = 'Silenciar notificaciones';
+  } else {
+    btn.classList.remove('active');
+    btn.title = 'Activar notificaciones';
+  }
 }
-
-let notifInterval = null;
 
 function startNotificationChecker() {
   if (notifInterval) clearInterval(notifInterval);
-  checkUpcomingTasks();                                 // chequeo inmediato
-  notifInterval = setInterval(checkUpcomingTasks, 60000); // cada minuto
+  checkUpcomingTasks();                                   
+  notifInterval = setInterval(checkUpcomingTasks, 60000); 
 }
 
+//-------- 25/03/2026
+
 function checkUpcomingTasks() {
-  if (Notification.permission !== 'granted') return;
+  // Aseguramos de que el permiso exista y el usuario no las haya silenciado globalmente
+  if (Notification.permission !== 'granted' || !notifsActive) return;
+  
   const now         = new Date();
   const todayKey    = dateKey(now);
   const currentMins = now.getHours() * 60 + now.getMinutes();
 
   tasks.forEach(task => {
     if (!task.time || task.day !== todayKey || task.done) return;
+    
+    // CAMBIO: Si la tarea tiene -1, la ignoramos por completo
+    const alertTime = task.alert_time !== undefined ? task.alert_time : 15;
+    if (alertTime === -1) return;
+
     const [h, m] = task.time.split(':').map(Number);
     const taskMins = h * 60 + m;
     const diff     = taskMins - currentMins;
-
-    // CAMBIO: Usar el alert_time de la base de datos (o 15 por defecto)
-    const alertTime = task.alert_time !== undefined ? task.alert_time : 15;
     
-    // Aviso según la preferencia del usuario
+    // Aviso según la preferencia
     const keyAlert = `${task.id}-alert-${alertTime}`;
     if (diff === alertTime && !notifiedSet.has(keyAlert)) {
       notifiedSet.add(keyAlert);
