@@ -576,27 +576,19 @@ function checkUpcomingTasks() {
     const [h, m] = task.time.split(':').map(Number);
     const taskMins = h * 60 + m;
     const diff     = taskMins - currentMins;
-
+/*
     // Aviso 15 minutos antes
     const key15 = `${task.id}-15`;
     if (diff === 15 && !notifiedSet.has(key15)) {
       notifiedSet.add(key15);
-      new Notification('⏰ Tarea en 15 min — PizarraLab', {
-        body: `"${task.text}" comienza a las ${task.time}`,
-        icon: '/icon-192.png',
-        tag:  key15
-      });
+      triggerRichNotification('⏰ Tarea en 15 min', `"${task.text}" comienza a las ${task.time}`, key15, task.id);
     }
-
+*/
     // Aviso puntual
     const key0 = `${task.id}-0`;
     if (diff === 0 && !notifiedSet.has(key0)) {
       notifiedSet.add(key0);
-      new Notification('🔔 ¡Tarea activa ahora! — PizarraLab', {
-        body: `"${task.text}"`,
-        icon: '/icon-192.png',
-        tag:  key0
-      });
+      triggerRichNotification('🔔 ¡Tarea activa ahora!', `"${task.text}"`, key0, task.id);
     }
   });
 }
@@ -639,5 +631,67 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+/**
+ * CAMBIO: Funciones para notificaciones interactivas y comunicación con Service Worker
+ * FECHA: 24/05/2026
+ */
+
+// Lanza una notificación con botones usando el Service Worker
+function triggerRichNotification(title, body, tag, taskId) {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(reg => {
+      reg.showNotification(title, {
+        body: body,
+        icon: '/icon-192.png',
+        tag: tag,
+        data: { taskId: taskId }, // Guardamos el ID para saber qué tarea modificar
+        actions: [
+          { action: 'done', title: '✓ Marcar hecho' },
+          { action: 'snooze', title: '⏰ Posponer 15m' }
+        ],
+        vibrate: [200, 100, 200]
+      });
+    });
+  }
+}
+
+// Función para sumar 15 minutos a la hora de una tarea
+async function snoozeTask(id) {
+  const t = tasks.find(x => x.id == id);
+  if (!t || !t.time) return;
+  
+  const [h, m] = t.time.split(':').map(Number);
+  let date = new Date();
+  date.setHours(h, m + 15);
+  
+  const newTime = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  t.time = newTime;
+  
+  renderAll(); // Actualización visual optimista
+  
+  try {
+    await apiFetch(`/api/tasks/${id}`, { method: 'PUT', body: JSON.stringify({ time: newTime }) });
+    showToast('Tarea pospuesta 15 min ⏰', 'info');
+  } catch (err) {
+    showToast('Error al posponer', 'error');
+    await loadAndRender(); // Revertir si falla
+  }
+}
+
+// Escuchar los mensajes que nos manda el sw.js cuando se hace clic en un botón
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', event => {
+    const { type, action, taskId } = event.data;
+    
+    if (type === 'NOTIF_ACTION' && taskId) {
+      if (action === 'done') {
+        toggleDone(taskId);
+        showToast('¡Tarea completada desde la notificación! ✓', 'success');
+      } else if (action === 'snooze') {
+        snoozeTask(taskId);
+      }
+    }
+  });
+}
 // ── Init ──────────────────────────────────────────────────
 checkInitialSession();
