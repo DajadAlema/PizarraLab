@@ -1,0 +1,15 @@
+{
+  "name": "pizarralab",
+  "version": "2.0.0",
+  "description": "Organizador de tareas con vistas semanal, mensual y kanban",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}
