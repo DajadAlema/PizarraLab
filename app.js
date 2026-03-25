@@ -420,6 +420,7 @@ function buildCard(task) {
     <div class="task-top">
       <div class="task-check${task.done?' checked':''}" onclick="toggleDone('${task.id}')">${task.done?'✓':''}</div>
       <span class="task-text">${esc(task.text)}</span>
+      <button class="task-edit" onclick="openEditModal('${task.id}')">✎</button>
       <button class="task-del" onclick="deleteTask('${task.id}')">✕</button>
     </div>
     <div class="task-meta">
@@ -461,6 +462,66 @@ function renderModalBody() {
 
 function closeModalBg(e) { if (e.target === document.getElementById('modalOverlay')) closeModalDirect(); }
 function closeModalDirect() { document.getElementById('modalOverlay').classList.remove('open'); modalDay = null; }
+
+// Funciones para Editar Tareas
+// 25/03/2026 avbx4ch2
+
+function openEditModal(id) {
+  const t = tasks.find(x => x.id == id);
+  if (!t) return;
+  
+  // Llenar el formulario con los datos actuales
+  document.getElementById('editTaskId').value = t.id;
+  document.getElementById('editText').value = t.text;
+  document.getElementById('editTime').value = t.time || '';
+  document.getElementById('editDate').value = t.day || '';
+  document.getElementById('editTag').value = t.tag || 'work';
+  document.getElementById('editStatus').value = t.status || 'todo';
+  document.getElementById('editAlert').value = t.alert_time !== undefined ? t.alert_time : 15;
+  
+  // Mostrar el modal
+  document.getElementById('editModalOverlay').classList.add('open');
+}
+
+function closeEditModal() { document.getElementById('editModalOverlay').classList.remove('open'); }
+function closeEditModalBg(e) { if (e.target === document.getElementById('editModalOverlay')) closeEditModal(); }
+
+async function saveEditTask() {
+  const id = document.getElementById('editTaskId').value;
+  const text = document.getElementById('editText').value.trim();
+  if (!text) return;
+
+  const btn = document.querySelector('#editModalOverlay .btn-auth');
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+
+  const updates = {
+    text: text,
+    time: document.getElementById('editTime').value || null,
+    day: document.getElementById('editDate').value || null,
+    tag: document.getElementById('editTag').value,
+    status: document.getElementById('editStatus').value,
+    alert_time: parseInt(document.getElementById('editAlert').value)
+  };
+
+  // Actualización optimista (cambiamos la UI antes de que responda el servidor)
+  const t = tasks.find(x => x.id == id);
+  if (t) { Object.assign(t, updates); }
+  renderAll();
+  closeEditModal();
+
+  try {
+    await apiFetch(`/api/tasks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates)
+    });
+    showToast('Tarea actualizada correctamente', 'success');
+  } catch (err) {
+    showToast('Error al actualizar: ' + err.message, 'error');
+    await loadAndRender(); // Revertimos si hay error en DB
+  } finally {
+    btn.textContent = 'Guardar Cambios'; btn.disabled = false;
+  }
+}
 
 // ═══════════════════════════════════════════════════════════
 // NAVIGATION & VIEW
