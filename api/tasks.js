@@ -57,7 +57,8 @@ module.exports = async function handler(req, res) {
 
   // ── POST ──────────────────────────────────────────────
   if (req.method === 'POST') {
-    const { text, tag, status, day, time, done } = req.body || {};
+    // CAMBIO: Recibir alert_time del body 24/03/2026
+    const { text, tag, status, day, time, done, alert_time } = req.body || {};
 
     // Validaciones
     if (!text || typeof text !== 'string' || text.trim().length === 0)
@@ -82,7 +83,9 @@ module.exports = async function handler(req, res) {
         day:     day  || null,
         time:    time || null,
         done:    !!done,
-        user_id: user.id
+        user_id: user.id,
+        // CAMBIO: Guardar el tiempo de alerta (por defecto 15 si no viene) 24/03/2026
+        alert_time: alert_time !== undefined ? parseInt(alert_time) : 15
       }])
       .select();
 
