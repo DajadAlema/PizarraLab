@@ -43,6 +43,27 @@ const TAG_LABELS = {
 };
 
 // ═══════════════════════════════════════════════════════════
+// THEMES
+// ═══════════════════════════════════════════════════════════
+
+function changeTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('pizarralab_theme', theme);
+}
+
+function loadSavedTheme() {
+  const savedTheme = localStorage.getItem('pizarralab_theme') || 'legacy';
+  document.body.setAttribute('data-theme', savedTheme);
+  
+  // Sincronizar el selector visualmente si existe
+  const select = document.getElementById('themeSelect');
+  if (select) select.value = savedTheme;
+}
+
+// Ejecutar inmediatamente para evitar parpadeos al cargar
+loadSavedTheme();
+
+// ═══════════════════════════════════════════════════════════
 // API HELPER
 // ═══════════════════════════════════════════════════════════
 
