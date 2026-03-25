@@ -21,6 +21,61 @@
   --t:         0.18s ease;
 }
 
+/* ── Tema: Noche Suave (Moderno y Relajante) ───────────────────────────── */
+body[data-theme="soft"] {
+  --bg:        #1e1e2e; /* Fondo azul grisáceo oscuro */
+  --surface:   #2a2a3f; /* Superficies */
+  --surface2:  #36364f; /* Tarjetas */
+  --border:    #44445f; /* Bordes suaves */
+  --accent:    #f9e2af; /* Amarillo pastel */
+  --accent2:   #f38ba8; /* Rojo coral para urgencias */
+  --text:      #cdd6f4; /* Texto blanco suave */
+  --muted:     #a6adc8; /* Gris azulado secundario */
+  --green:     #a6e3a1; /* Verde menta */
+  --blue:      #89b4fa; /* Azul aciano */
+  --purple:    #cba6f7; /* Lavanda */
+  --radius:    10px;    /* Todo más redondeado */
+}
+
+/* ── Tema: Sakura 🌸 (Estética Japonesa Primaveral) ────────────────────── */
+body[data-theme="sakura"] {
+  --bg:        #fff0f5; /* LavenderBlush - rosa extremadamente claro */
+  --surface:   rgba(255, 255, 255, 0.85); /* Blanco cristalino */
+  --surface2:  rgba(255, 245, 247, 0.9); /* Blanco con leve tinte rosa */
+  --border:    #ffb7c5; /* Rosa cerezo para los bordes */
+  --accent:    #ff77a9; /* Rosa Sakura vibrante */
+  --accent2:   #c71585; /* Magenta/Carmesí oscuro para urgencias */
+  --text:      #4a3b42; /* Marrón oscuro cálido (madera) para leer bien */
+  --muted:     #9a8b92; /* Marrón/rosa grisáceo */
+  --green:     #8fbc8f; /* Verde matcha */
+  --blue:      #87cefa; /* Azul cielo despejado */
+  --purple:    #dda0dd; /* Ciruela claro */
+  --radius:    12px;    /* Extra redondeado para suavidad */
+  
+  /* Toque especial: Degradado primaveral en el fondo */
+  background-image: 
+    radial-gradient(circle at 10% 20%, #ffe4e1 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, #ffc0cb 0%, transparent 40%);
+  background-attachment: fixed;
+}
+
+/* Ajustes específicos para que Sakura (que es un tema claro) se lea perfecto */
+body[data-theme="sakura"] .task-text,
+body[data-theme="sakura"] .auth-input,
+body[data-theme="sakura"] select { 
+  color: var(--text); 
+}
+body[data-theme="sakura"] header { 
+  backdrop-filter: blur(10px); /* Efecto cristal en el header */
+}
+body[data-theme="sakura"] .task-card { 
+  box-shadow: 0 4px 10px rgba(255, 183, 197, 0.2); /* Sombra rosada */
+}
+body[data-theme="sakura"] .task-card:hover { 
+  box-shadow: 0 8px 20px rgba(255, 183, 197, 0.4); 
+}
+
+
 /* ── Reset ──────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
