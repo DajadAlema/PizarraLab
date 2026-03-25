@@ -85,8 +85,8 @@ function showApp(user) {
   updateDaySelect();
   loadAndRender();
   
-  // CAMBIO: Iniciar notificaciones solo si tienen permiso Y el usuario las dejó prendidas
-  if (Notification.permission === 'granted' && notifsActive) {
+  // CAMBIO: Comprobación de seguridad para navegadores móviles
+  if ('Notification' in window && Notification.permission === 'granted' && notifsActive) {
     activateNotifs();
   } else {
     updateNotifBtn(false);
