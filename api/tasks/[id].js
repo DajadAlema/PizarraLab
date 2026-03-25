@@ -15,7 +15,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-const ALLOWED_FIELDS  = ['text','tag','status','day','time','done'];
+const ALLOWED_FIELDS  = ['text','tag','status','day','time','done', 'alert_time'];
 const VALID_TAGS      = ['work','personal','urgent','idea'];
 const VALID_STATUSES  = ['todo','inprogress','review','done'];
 const TIME_REGEX      = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -61,6 +61,9 @@ function sanitizeUpdates(body) {
       case 'time':
         if (body.time !== null && !TIME_REGEX.test(body.time)) { errors.push('Hora inválida'); break; }
         updates.time = body.time || null;
+        break;
+      case 'alert_time':
+        updates.alert_time = body.alert_time !== undefined ? parseInt(body.alert_time) : 15;
         break;
     }
   });
