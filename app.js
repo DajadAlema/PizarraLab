@@ -664,8 +664,8 @@ function startNotificationChecker() {
 //-------- 25/03/2026
 
 function checkUpcomingTasks() {
-  // Aseguramos de que el permiso exista y el usuario no las haya silenciado globalmente
-  if (Notification.permission !== 'granted' || !notifsActive) return;
+  // CAMBIO: Si no existe 'Notification' o no hay permisos, cancelamos silenciosamente
+  if (!('Notification' in window) || Notification.permission !== 'granted' || !notifsActive) return;
   
   const now         = new Date();
   const todayKey    = dateKey(now);
@@ -674,7 +674,6 @@ function checkUpcomingTasks() {
   tasks.forEach(task => {
     if (!task.time || task.day !== todayKey || task.done) return;
     
-    // CAMBIO: Si la tarea tiene -1, la ignoramos por completo
     const alertTime = task.alert_time !== undefined ? task.alert_time : 15;
     if (alertTime === -1) return;
 
