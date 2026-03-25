@@ -174,7 +174,9 @@ async function addTask() {
         status: document.getElementById('statusSelect').value,
         day:    document.getElementById('daySelect').value || null,
         time:   document.getElementById('timeInput').value || null,
-        done:   false
+        done:   false,
+        // CAMBIO: Enviar la preferencia de alerta
+        alert_time: parseInt(document.getElementById('alertSelect').value)
       })
     });
     tasks.unshift(task);
@@ -576,19 +578,16 @@ function checkUpcomingTasks() {
     const [h, m] = task.time.split(':').map(Number);
     const taskMins = h * 60 + m;
     const diff     = taskMins - currentMins;
-/*
-    // Aviso 15 minutos antes
-    const key15 = `${task.id}-15`;
-    if (diff === 15 && !notifiedSet.has(key15)) {
-      notifiedSet.add(key15);
-      triggerRichNotification('⏰ Tarea en 15 min', `"${task.text}" comienza a las ${task.time}`, key15, task.id);
-    }
-*/
-    // Aviso puntual
-    const key0 = `${task.id}-0`;
-    if (diff === 0 && !notifiedSet.has(key0)) {
-      notifiedSet.add(key0);
-      triggerRichNotification('🔔 ¡Tarea activa ahora!', `"${task.text}"`, key0, task.id);
+
+    // CAMBIO: Usar el alert_time de la base de datos (o 15 por defecto)
+    const alertTime = task.alert_time !== undefined ? task.alert_time : 15;
+    
+    // Aviso según la preferencia del usuario
+    const keyAlert = `${task.id}-alert-${alertTime}`;
+    if (diff === alertTime && !notifiedSet.has(keyAlert)) {
+      notifiedSet.add(keyAlert);
+      const timeStr = alertTime === 0 ? "ahora" : `en ${alertTime} min`;
+      triggerRichNotification(`⏰ Tarea ${timeStr}`, `"${task.text}" a las ${task.time}`, keyAlert, task.id);
     }
   });
 }
