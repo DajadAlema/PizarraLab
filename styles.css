@@ -273,6 +273,15 @@ main { padding: 24px 28px; }
 }
 .task-card:hover .task-del { opacity: 1; }
 .task-del:hover { color: var(--accent2); }
+/* Botón de editar tarea 25/03/2026 avbx4ch2  */
+.task-edit {
+  opacity: 0; background: none; border: none;
+  color: var(--muted); cursor: pointer;
+  font-size: 0.95rem; padding: 0 4px;
+  transition: var(--t); line-height: 1;
+}
+.task-card:hover .task-edit { opacity: 1; }
+.task-edit:hover { color: var(--blue); }
 
 .task-meta { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; align-items: center; }
 .tag {
