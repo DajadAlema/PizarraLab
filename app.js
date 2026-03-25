@@ -12,8 +12,8 @@
 // ── Config ────────────────────────────────────────────────
 // SUPABASE_ANON_KEY es una clave pública — seguro tenerla en frontend
 // Solo se usa para autenticación, NO para acceder a datos
-const SUPABASE_URL      = 'TU_SUPABASE_URL';       // reemplaza esto
-const SUPABASE_ANON_KEY = 'TU_SUPABASE_ANON_KEY';  // reemplaza esto
+const SUPABASE_URL      = 'https://oqfdstzfvgdxnzmsotim.supabase.co';       // reemplaza esto
+const SUPABASE_ANON_KEY = 'sb_publishable_FL9Od8OjI_zGQloYIep-dw_Cn7c_XpC';  // reemplaza esto
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ── State ─────────────────────────────────────────────────
