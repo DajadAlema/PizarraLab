@@ -155,6 +155,47 @@
     </div>
   </div>
 
+  <!-- Pop-up window for editing 25/03/2026 avbx4ch2 -->
+  <div class="modal-overlay" id="editModalOverlay" onclick="closeEditModalBg(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">Editar Tarea</span>
+        <button class="modal-close" onclick="closeEditModal()">&#10005;</button>
+      </div>
+      <div class="modal-body" style="padding-top: 16px;">
+        <input type="hidden" id="editTaskId" />
+        <div class="auth-form">
+          <input type="text" id="editText" class="auth-input" placeholder="Texto de la tarea" maxlength="200" />
+          <div style="display: flex; gap: 10px;">
+            <input type="time" id="editTime" class="auth-input" title="Hora" style="flex: 1;" />
+            <input type="date" id="editDate" class="auth-input" title="Fecha" style="flex: 1;" />
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <select id="editTag" class="auth-input" style="flex: 1;">
+              <option value="work">💼 Trabajo</option>
+              <option value="personal">🎯 Personal</option>
+              <option value="urgent">🔥 Urgente</option>
+              <option value="idea">💡 Idea</option>
+            </select>
+            <select id="editStatus" class="auth-input" style="flex: 1;">
+              <option value="todo">Por hacer</option>
+              <option value="inprogress">En progreso</option>
+              <option value="review">En revisión</option>
+              <option value="done">Hecho</option>
+            </select>
+          </div>
+          <select id="editAlert" class="auth-input">
+            <option value="0">Avisar a la hora</option>
+            <option value="15">Avisar 15 min antes</option>
+            <option value="30">Avisar 30 min antes</option>
+            <option value="60">Avisar 1 hora antes</option>
+          </select>
+          <button class="btn-auth" onclick="saveEditTask()">Guardar Cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
 </main>
 
 <!-- ── Scripts ───────────────────────────────────── -->
