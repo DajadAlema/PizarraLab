@@ -83,16 +83,33 @@ self.addEventListener('push', event => {
   );
 });
 
-// ── Notification click: abrir la app ─────────────────────
+// ── Notification click: abrir la app y manejar botones ─────────────────────
+// FECHA: 24/05/2026
 self.addEventListener('notificationclick', event => {
-  event.notification.close();
+  event.notification.close(); // Cerramos la notificación al tocarla
+  
+  const action = event.action; // Identifica qué botón se presionó ('done' o 'snooze')
+  const data = event.notification.data || {}; // Recuperamos el ID de la tarea
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      for (const client of clientList) {
-        if (client.url.includes(self.location.origin) && 'focus' in client) {
+      // Buscamos si PizarraLab ya está abierta en alguna pestaña
+      const client = clientList.find(c => c.url.includes(self.location.origin));
+
+      // Si el usuario presionó un botón de acción
+      if (action === 'done' || action === 'snooze') {
+        if (client) {
+          // Le mandamos un mensaje silencioso a la app abierta para que ejecute la acción
+          client.postMessage({ type: 'NOTIF_ACTION', action: action, taskId: data.taskId });
           return client.focus();
+        } else {
+          // Si la app estaba cerrada, la abrimos
+          return clients.openWindow('/');
         }
       }
+
+      // Comportamiento por defecto: Si tocó la notificación pero no un botón, enfocamos la app
+      if (client && 'focus' in client) return client.focus();
       return clients.openWindow('/');
     })
   );
