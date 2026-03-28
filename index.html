@@ -50,15 +50,17 @@
     <button class="tab-btn" onclick="switchView('kanban',this)">🗂 Kanban</button>
   </div>
   <div class="header-actions">
-    <select id="themeSelect" class="btn-sm" onchange="changeTheme(this.value)" style="background: var(--surface); color: var(--text); border-color: var(--border);">
-      <option value="legacy">Tema: Oscuro (Original)</option>
-      <option value="soft">Tema: Noche Suave</option>
-      <option value="sakura">Tema: Sakura 🌸</option>
+    <select id="themeSelect" class="btn-sm" onchange="changeTheme(this.value)" style="background: var(--surface); color: var(--text);">
+      <option value="legacy">Tema: Legacy</option>
+      <option value="soft">Tema: Suave</option>
     </select>
     
     <button class="btn-sm" id="notifBtn" onclick="toggleNotifications()" title="Activar/Desactivar notificaciones">🔔</button>
     <button class="btn-sm" onclick="clearDone()">Limpiar hechas</button>
     <button class="btn-sm" onclick="exportData()">Exportar JSON</button>
+    
+    <button class="btn-sm" onclick="exportICS()" style="border-color: var(--blue); color: var(--blue);">Sincronizar Calendario</button>
+    
     <button class="btn-sm btn-logout" onclick="handleLogout()">Salir</button>
   </div>
 </header>
