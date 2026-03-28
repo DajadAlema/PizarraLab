@@ -825,7 +825,7 @@ function exportICS() {
   
   // Extraemos el dominio sin el https://
   const host = window.location.host; 
-  const syncUrl = `webcal://${host}/api/calendar?user=${currentUser.id}`;
+  const syncUrl = `webcal://${host}/api/calendar.ics?user=${currentUser.id}`;
   
   // Esto obligará al iPhone a abrir la app de Calendario al instante
   window.location.href = syncUrl;
