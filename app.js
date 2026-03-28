@@ -812,5 +812,22 @@ if ('serviceWorker' in navigator) {
     }
   });
 }
+
+// ═══════════════════════════════════════════════════════════
+// SYNC CALENDAR (Suscripción WebCal)
+// ═══════════════════════════════════════════════════════════
+
+function exportICS() {
+  if (!currentUser || !currentUser.id) {
+    showToast('Error: No se encontró el usuario', 'error');
+    return;
+  }
+  
+  // Generamos tu URL secreta usando tu ID de Supabase
+  const syncUrl = `${window.location.origin}/api/calendar?user=${currentUser.id}`;
+  
+  // Te muestra el enlace para copiarlo
+  prompt("Copia este enlace secreto y pégalo en 'Añadir calendario suscrito' en tu iPhone:\n\n(No compartas este enlace)", syncUrl);
+}
 // ── Init ──────────────────────────────────────────────────
 checkInitialSession();
