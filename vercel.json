@@ -30,6 +30,7 @@
   ],
   "rewrites": [
     { "source": "/api/tasks",     "destination": "/api/tasks.js" },
-    { "source": "/api/tasks/:id", "destination": "/api/tasks/[id].js" }
+    { "source": "/api/tasks/:id", "destination": "/api/tasks/[id].js" },
+    { "source": "/api/calendar.ics", "destination": "/api/calendar.js" }
   ]
 }
