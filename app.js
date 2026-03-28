@@ -814,22 +814,26 @@ if ('serviceWorker' in navigator) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// SYNC CALENDAR (Suscripción WebCal)
+// SYNC CALENDAR (Suscripción Automática)
 // ═══════════════════════════════════════════════════════════
-
+// avbx4ch2  28/03/2026
 function exportICS() {
   if (!currentUser || !currentUser.id) {
     showToast('Error: No se encontró el usuario', 'error');
     return;
   }
   
-  // Extraemos solo el dominio (ej. pizarra-lab.vercel.app)
+  // Extraemos el dominio sin el https://
   const host = window.location.host; 
-  
-  // Usamos WEBCAL:// en lugar de HTTPS://
   const syncUrl = `webcal://${host}/api/calendar?user=${currentUser.id}`;
   
-  prompt("Copia este enlace y pégalo en 'Añadir calendario suscrito' en tu iPhone:\n\n", syncUrl);
+  // Esto obligará al iPhone a abrir la app de Calendario al instante
+  window.location.href = syncUrl;
+  
+  // Como plan B, mostramos el enlace 1 segundo después por si acaso
+  setTimeout(() => {
+    prompt("Si tu calendario no se abrió solo, copia este enlace (asegúrate de que diga webcal):", syncUrl);
+  }, 1000);
 }
 // ── Init ──────────────────────────────────────────────────
 checkInitialSession();
