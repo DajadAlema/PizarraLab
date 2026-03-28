@@ -62,6 +62,6 @@ export default async function handler(req, res) {
 
   // Le decimos al navegador/iPhone que esto es un calendario y no una página web
   res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
-  res.setHeader('Content-Disposition', 'attachment; filename="pizarralab.ics"');
+  res.setHeader('Content-Disposition', 'inline; filename="pizarralab.ics"');
   res.status(200).send(ics);
 }
