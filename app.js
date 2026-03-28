@@ -823,11 +823,13 @@ function exportICS() {
     return;
   }
   
-  // Generamos tu URL secreta usando tu ID de Supabase
-  const syncUrl = `${window.location.origin}/api/calendar?user=${currentUser.id}`;
+  // Extraemos solo el dominio (ej. pizarra-lab.vercel.app)
+  const host = window.location.host; 
   
-  // Te muestra el enlace para copiarlo
-  prompt("Copia este enlace secreto y pégalo en 'Añadir calendario suscrito' en tu iPhone:\n\n(No compartas este enlace)", syncUrl);
+  // Usamos WEBCAL:// en lugar de HTTPS://
+  const syncUrl = `webcal://${host}/api/calendar?user=${currentUser.id}`;
+  
+  prompt("Copia este enlace y pégalo en 'Añadir calendario suscrito' en tu iPhone:\n\n", syncUrl);
 }
 // ── Init ──────────────────────────────────────────────────
 checkInitialSession();
