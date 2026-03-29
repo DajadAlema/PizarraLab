@@ -53,8 +53,11 @@ export default async function handler(req, res) {
         let safeText = (t.text || 'Tarea').replace(/\n/g, ' ').replace(/,/g, '\\,').replace(/;/g, '\\;');
         if (safeText.length > 60) safeText = safeText.substring(0, 60) + '...';
 
-        ics += `SUMMARY:${safeText}\r\n`;
-        ics += `STATUS:${t.done ? 'COMPLETED' : 'NEEDS-ACTION'}\r\n`;
+        // Si la tarea ya está hecha, le ponemos una palomita visual en el título
+        const prefix = t.done ? '✅ ' : '';
+        ics += `SUMMARY:${prefix}${safeText}\r\n`;
+        
+        // ¡Cero estados! Directo al final del evento
         ics += "END:VEVENT\r\n";
       });
     }
