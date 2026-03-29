@@ -20,7 +20,15 @@ export default async function handler(req, res) {
   if (error) return res.status(500).send('Error en la base de datos');
 
   // Construimos el archivo de calendario
-  let ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//PizarraLab//ES\r\nCALSCALE:GREGORIAN\r\n";
+  // 1. Cabeceras estrictas para Apple
+  let ics = "BEGIN:VCALENDAR\r\n";
+  ics += "VERSION:2.0\r\n";
+  ics += "PRODID:-//PizarraLab//ES\r\n";
+  ics += "CALSCALE:GREGORIAN\r\n";
+  ics += "METHOD:PUBLISH\r\n";          // Obligatorio para iOS
+  ics += "X-WR-CALNAME:PizarraLab\r\n"; // El iPhone tomará este nombre automáticamente
+  ics += "X-PUBLISHED-TTL:PT1H\r\n";    // Le pedimos al iPhone que se actualice cada hora
+
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');
   const dtstamp = `${now.getUTCFullYear()}${pad(now.getUTCMonth()+1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
@@ -52,15 +60,16 @@ export default async function handler(req, res) {
       ics += `DTEND;VALUE=DATE:${endDate}\r\n`;
     }
 
-    ics += `SUMMARY:${t.text}\r\n`;
-    if (t.tag) ics += `CATEGORIES:PizarraLab\r\n`;
+    // 2. Limpieza de texto: Quitamos saltos de línea (Enters) que rompen el calendario
+    const cleanText = t.text.replace(/\n/g, ' ').trim();
+    
+    ics += `SUMMARY:${cleanText}\r\n`;
     ics += `STATUS:${t.done ? 'COMPLETED' : 'NEEDS-ACTION'}\r\n`;
     ics += "END:VEVENT\r\n";
   });
 
   ics += "END:VCALENDAR\r\n";
 
-  // Le decimos al navegador/iPhone que esto es un calendario y no una página web
   res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
   res.setHeader('Content-Disposition', 'inline; filename="pizarralab.ics"');
   res.status(200).send(ics);
