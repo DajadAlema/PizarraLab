@@ -1,76 +1,66 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
-
 export default async function handler(req, res) {
-  // Obtenemos el ID del usuario desde la URL secreta
-  const { user } = req.query;
-  if (!user) return res.status(400).send('ID de usuario requerido');
+  try {
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_KEY
+    );
 
-  // Buscamos solo las tareas de este usuario que tengan fecha asignada
-  const { data: tasks, error } = await supabase
-    .from('tareas')
-    .select('*')
-    .eq('user_id', user)
-    .not('day', 'is', null);
+    const { user } = req.query;
+    if (!user) return res.status(400).send('Falta ID de usuario');
 
-  if (error) return res.status(500).send('Error en la base de datos');
+    const { data: tasks, error } = await supabase
+      .from('tareas')
+      .select('*')
+      .eq('user_id', user)
+      .not('day', 'is', null);
 
-  // Construimos el archivo de calendario
-  // 1. Cabeceras estrictas para Apple
-  let ics = "BEGIN:VCALENDAR\r\n";
-  ics += "VERSION:2.0\r\n";
-  ics += "PRODID:-//PizarraLab//ES\r\n";
-  ics += "CALSCALE:GREGORIAN\r\n";
-  ics += "METHOD:PUBLISH\r\n";          // Obligatorio para iOS
-  ics += "X-WR-CALNAME:PizarraLab\r\n"; // El iPhone tomará este nombre automáticamente
-  ics += "X-PUBLISHED-TTL:PT1H\r\n";    // Le pedimos al iPhone que se actualice cada hora
+    if (error) throw error;
 
-  const now = new Date();
-  const pad = n => String(n).padStart(2, '0');
-  const dtstamp = `${now.getUTCFullYear()}${pad(now.getUTCMonth()+1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
+    let ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//PizarraLab//ES\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:PizarraLab\r\nX-PUBLISHED-TTL:PT1H\r\n";
+    
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const dtstamp = `${now.getUTCFullYear()}${pad(now.getUTCMonth()+1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
 
-  tasks.forEach(t => {
-    ics += "BEGIN:VEVENT\r\n";
-    ics += `UID:${t.id}@pizarralab\r\n`;
-    ics += `DTSTAMP:${dtstamp}\r\n`;
+    if (tasks && tasks.length > 0) {
+      tasks.forEach(t => {
+        ics += "BEGIN:VEVENT\r\n";
+        ics += `UID:${t.id}@pizarralab\r\n`;
+        ics += `DTSTAMP:${dtstamp}\r\n`;
 
-    const [yyyy, mm, dd] = t.day.split('-');
+        const [yyyy, mm, dd] = t.day.split('-');
 
-    if (t.time) {
-      const [hh, min] = t.time.split(':');
-      const startDate = `${yyyy}${mm}${dd}T${hh}${min}00`;
-      
-      let endDateObj = new Date(yyyy, mm - 1, dd, hh, min);
-      endDateObj.setHours(endDateObj.getHours() + 1);
-      const endDate = `${endDateObj.getFullYear()}${pad(endDateObj.getMonth()+1)}${pad(endDateObj.getDate())}T${pad(endDateObj.getHours())}${pad(endDateObj.getMinutes())}00`;
+        if (t.time) {
+          const [hh, min] = t.time.split(':');
+          ics += `DTSTART:${yyyy}${mm}${dd}T${hh}${min}00\r\n`;
+          let endD = new Date(yyyy, mm - 1, dd, hh, min);
+          endD.setHours(endD.getHours() + 1);
+          ics += `DTEND:${endD.getFullYear()}${pad(endD.getMonth()+1)}${pad(endD.getDate())}T${pad(endD.getHours())}${pad(endD.getMinutes())}00\r\n`;
+        } else {
+          let endD = new Date(yyyy, mm - 1, dd);
+          endD.setDate(endD.getDate() + 1);
+          ics += `DTSTART;VALUE=DATE:${yyyy}${mm}${dd}\r\n`;
+          ics += `DTEND;VALUE=DATE:${endD.getFullYear()}${pad(endD.getMonth()+1)}${pad(endD.getDate())}\r\n`;
+        }
 
-      ics += `DTSTART:${startDate}\r\n`;
-      ics += `DTEND:${endDate}\r\n`;
-    } else {
-      const startDate = `${yyyy}${mm}${dd}`;
-      let endDateObj = new Date(yyyy, mm - 1, dd);
-      endDateObj.setDate(endDateObj.getDate() + 1);
-      const endDate = `${endDateObj.getFullYear()}${pad(endDateObj.getMonth()+1)}${pad(endDateObj.getDate())}`;
+        // 🚨 FILTRO ANTI-APPLE: Escapar comas, punto y coma, y cortar textos largos
+        let safeText = t.text.replace(/\n/g, ' ').replace(/,/g, '\\,').replace(/;/g, '\\;');
+        if (safeText.length > 60) safeText = safeText.substring(0, 60) + '...';
 
-      ics += `DTSTART;VALUE=DATE:${startDate}\r\n`;
-      ics += `DTEND;VALUE=DATE:${endDate}\r\n`;
+        ics += `SUMMARY:${safeText}\r\n`;
+        ics += `STATUS:${t.done ? 'COMPLETED' : 'NEEDS-ACTION'}\r\n`;
+        ics += "END:VEVENT\r\n";
+      });
     }
 
-    // 2. Limpieza de texto: Quitamos saltos de línea (Enters) que rompen el calendario
-    const cleanText = t.text.replace(/\n/g, ' ').trim();
-    
-    ics += `SUMMARY:${cleanText}\r\n`;
-    ics += `STATUS:${t.done ? 'COMPLETED' : 'NEEDS-ACTION'}\r\n`;
-    ics += "END:VEVENT\r\n";
-  });
+    ics += "END:VCALENDAR\r\n";
 
-  ics += "END:VCALENDAR\r\n";
-
-  res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
-  res.setHeader('Content-Disposition', 'inline; filename="pizarralab.ics"');
-  res.status(200).send(ics);
+    res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+    res.setHeader('Content-Disposition', 'inline; filename="pizarralab.ics"');
+    res.status(200).send(ics);
+  } catch (err) {
+    res.status(500).send("Error interno");
+  }
 }
