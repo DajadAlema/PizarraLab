@@ -26,13 +26,17 @@ export default async function handler(req, res) {
 
     if (tasks && tasks.length > 0) {
       tasks.forEach(t => {
+        // 🚨 LA SOLUCIÓN: Si la fecha no es exactamente YYYY-MM-DD, nos la saltamos para no romper Apple
+        if (!t.day || !/^\d{4}-\d{2}-\d{2}$/.test(t.day)) return;
+
         ics += "BEGIN:VEVENT\r\n";
         ics += `UID:${t.id}@pizarralab\r\n`;
         ics += `DTSTAMP:${dtstamp}\r\n`;
 
         const [yyyy, mm, dd] = t.day.split('-');
 
-        if (t.time) {
+        // También validamos que la hora (si tiene) esté bien escrita
+        if (t.time && /^\d{2}:\d{2}$/.test(t.time)) {
           const [hh, min] = t.time.split(':');
           ics += `DTSTART:${yyyy}${mm}${dd}T${hh}${min}00\r\n`;
           let endD = new Date(yyyy, mm - 1, dd, hh, min);
@@ -45,8 +49,8 @@ export default async function handler(req, res) {
           ics += `DTEND;VALUE=DATE:${endD.getFullYear()}${pad(endD.getMonth()+1)}${pad(endD.getDate())}\r\n`;
         }
 
-        // 🚨 FILTRO ANTI-APPLE: Escapar comas, punto y coma, y cortar textos largos
-        let safeText = t.text.replace(/\n/g, ' ').replace(/,/g, '\\,').replace(/;/g, '\\;');
+        // Filtro anti-Apple para textos
+        let safeText = (t.text || 'Tarea').replace(/\n/g, ' ').replace(/,/g, '\\,').replace(/;/g, '\\;');
         if (safeText.length > 60) safeText = safeText.substring(0, 60) + '...';
 
         ics += `SUMMARY:${safeText}\r\n`;
