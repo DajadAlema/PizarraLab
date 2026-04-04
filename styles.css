@@ -598,3 +598,9 @@ main { padding: 24px 28px; }
   cursor: pointer;
   user-select: none; /* Evita que el texto se sombree al hacer doble clic */
 }
+
+/* Ocultar el ojito nativo de Edge/Internet Explorer */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
