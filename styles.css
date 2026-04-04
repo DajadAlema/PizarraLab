@@ -143,6 +143,46 @@ header {
 .btn-logout:hover { background: var(--accent2); color: #fff; }
 #notifBtn.active { border-color: var(--green); color: var(--green); }
 
+/* ── User Badge (Perfil) ───────────────────────────── */
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  margin-right: 8px; /* Lo separa un poco del selector de temas */
+  transition: var(--t);
+  cursor: pointer;
+}
+
+.user-badge:hover {
+  border-color: var(--accent);
+}
+
+.user-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #000; /* Texto oscuro para que resalte con el color de acento */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.user-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
 /* ── Main Layout ────────────────────────────────────── */
 main { padding: 24px 28px; }
 .view { display: none; }
