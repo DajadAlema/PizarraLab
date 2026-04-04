@@ -215,9 +215,103 @@ async function loadProfile(user) {
       document.getElementById('userAvatar').textContent = data.username.charAt(0).toUpperCase();
       // Mostramos la insignia
       document.getElementById('userBadge').style.display = 'flex';
+
+      // Aplicamos el tema guardado en la nube
+      if (data.theme_preference) changeTheme(data.theme_preference);
     }
   } catch (err) {
     console.error('Error cargando el perfil:', err);
+  }
+}
+
+// Abrir el modal de perfil y cargar los datos
+async function openProfileModal() {
+  if (!currentUser) return;
+  
+  try {
+    // Descargamos toda la info de tu perfil desde Supabase
+    const { data, error } = await _supabase
+      .from('perfiles')
+      .select('*')
+      .eq('id', currentUser.id)
+      .single();
+
+    if (data) {
+      // Llenamos los campos con tu información
+      document.getElementById('profileUsername').value = data.username || '';
+      document.getElementById('profileBio').value = data.bio || '';
+      document.getElementById('profileTheme').value = data.theme_preference || 'legacy';
+      document.getElementById('profileDefaultAlert').value = data.alerta_default !== null ? data.alerta_default : 15;
+      
+      // Actualizamos la inicial grande
+      document.getElementById('profileAvatarBig').textContent = (data.username || '?').charAt(0).toUpperCase();
+      
+      // Formateamos la fecha para que se vea bonita (ej. "abril de 2026")
+      const dateObj = new Date(data.created_at);
+      const monthYear = dateObj.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+      document.getElementById('profileStats').innerHTML = `Miembro desde: ${monthYear} <br> Tareas hechas: ${data.tareas_completadas || 0}`;
+    }
+  } catch (err) {
+    console.error('Error cargando detalles del perfil:', err);
+  }
+  
+  // Mostramos la ventana
+  document.getElementById('profileModalOverlay').classList.add('open');
+}
+
+// Cerrar el modal
+function closeProfileModal() { 
+  document.getElementById('profileModalOverlay').classList.remove('open'); 
+}
+function closeProfileModalBg(e) { 
+  if (e.target === document.getElementById('profileModalOverlay')) closeProfileModal(); 
+}
+
+// Guardar los cambios en la base de datos
+async function saveProfile() {
+  const btn = document.getElementById('saveProfileBtn');
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+
+  const newUsername = document.getElementById('profileUsername').value.trim();
+  const newBio = document.getElementById('profileBio').value.trim();
+  const newTheme = document.getElementById('profileTheme').value;
+  const newAlert = parseInt(document.getElementById('profileDefaultAlert').value);
+
+  try {
+    // Enviamos los datos actualizados a Supabase
+    const { error } = await _supabase
+      .from('perfiles')
+      .update({
+        username: newUsername,
+        bio: newBio,
+        theme_preference: newTheme,
+        alerta_default: newAlert
+      })
+      .eq('id', currentUser.id);
+
+    if (error) throw error;
+
+    showToast('Perfil actualizado correctamente', 'success');
+    
+    // Aplicamos los cambios visuales de inmediato sin recargar la página
+    changeTheme(newTheme); 
+    
+    // Actualizamos las iniciales e insignias
+    document.getElementById('userNameDisplay').textContent = '@' + newUsername;
+    const initial = newUsername.charAt(0).toUpperCase();
+    document.getElementById('userAvatar').textContent = initial;
+    document.getElementById('profileAvatarBig').textContent = initial;
+
+    closeProfileModal();
+  } catch (err) {
+    // Si alguien más ya tiene ese nombre de usuario, la base de datos nos avisa (unique constraint)
+    if (err.message.includes('unique constraint')) {
+      showToast('Ese nombre de usuario ya está ocupado', 'error');
+    } else {
+      showToast('Error al guardar: ' + err.message, 'error');
+    }
+  } finally {
+    btn.textContent = 'Guardar Cambios'; btn.disabled = false;
   }
 }
 
