@@ -62,7 +62,7 @@
   <div class="header-actions">
     <button class="btn-sm" onclick="clearDone()">Limpiar hechas</button>
     
-    <div class="user-badge" id="userBadge" style="display: none;" onclick="openProfileModal()">
+    <div class="user-badge" id="userBadge" style="display: none;" onclick="openSidebar()">
       <div class="user-avatar" id="userAvatar">?</div>
       <span class="user-name" id="userNameDisplay">@usuario</span>
     </div>
@@ -211,6 +211,37 @@
     </div>
   </div>
 
+  <!-- Barra lateral -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebarBg(event)">
+    <div class="sidebar" id="sidebar">
+      
+      <div class="sidebar-header">
+        <div class="sidebar-user-info">
+          <div class="user-avatar big-avatar" id="sidebarAvatar">?</div>
+          <div class="user-details">
+            <span class="user-name" id="sidebarUsername">@usuario</span>
+            <span class="user-email" id="sidebarEmail">correo@ejemplo.com</span>
+          </div>
+        </div>
+        <button class="sidebar-close" onclick="closeSidebar()">&#10005;</button>
+      </div>
+      
+      <div class="sidebar-menu">
+        <div class="menu-label">Herramientas Rápidas</div>
+        <button class="menu-item" onclick="toggleNotifications()">🔔 Notificaciones</button>
+        <button class="menu-item" onclick="exportICS()">📅 Sincronizar Calendario</button>
+        <button class="menu-item" onclick="exportData()">💾 Exportar JSON</button>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="btn-sm btn-settings" onclick="openProfileModalFromSidebar()">⚙️ Ajustes de Cuenta</button>
+        <button class="btn-sm btn-logout" onclick="handleLogout()" style="width: 100%;">🚪 Salir</button>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Profile overlay -->
   <div class="modal-overlay" id="profileModalOverlay" onclick="closeProfileModalBg(event)">
     <div class="modal" style="width: 480px;">
       <div class="modal-header">
