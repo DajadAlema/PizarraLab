@@ -574,3 +574,27 @@ main { padding: 24px 28px; }
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Toggle de Contraseña ───────────────────────────── */
+.password-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text);
+  opacity: 0.8;
+  margin-top: -8px;      /* Lo acerca un poco al input de arriba */
+  margin-bottom: 16px;   /* Le da espacio antes del botón de Entrar */
+}
+
+.password-toggle input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: var(--accent); /* Usa el color de acento de tu tema actual */
+  width: 14px;
+  height: 14px;
+}
+
+.password-toggle label {
+  cursor: pointer;
+  user-select: none; /* Evita que el texto se sombree al hacer doble clic */
+}
