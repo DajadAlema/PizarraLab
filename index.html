@@ -25,8 +25,8 @@
         <input type="email" id="loginEmail" class="auth-input" placeholder="Tu email" required autocomplete="email"/>
         <input type="password" id="loginPassword" class="auth-input" placeholder="Tu contraseña" required autocomplete="current-password" minlength="6"/>
           <div class="password-toggle">
-            <input type="checkbox" id="showPassCheck" onchange="togglePasswordVisibility()">
-            <label for="showPassCheck">Mostrar contraseña</label>
+            <input type="checkbox" id="showPassLogin" onchange="togglePasswordVisibility('loginPassword')">
+            <label for="showPassLogin">Mostrar contraseña</label>
           </div>
         <button type="submit" class="btn-auth">Entrar</button>
       </form>
@@ -41,8 +41,8 @@
         <input type="email" id="registerEmail" class="auth-input" placeholder="Tu email" required autocomplete="email"/>
         <input type="password" id="registerPassword" class="auth-input" placeholder="Contraseña (mín. 6 caracteres)" required autocomplete="new-password" minlength="6"/>
           <div class="password-toggle">
-            <input type="checkbox" id="showPassCheck" onchange="togglePasswordVisibility()">
-            <label for="showPassCheck">Mostrar contraseña</label>
+            <input type="checkbox" id="showPassReg" onchange="togglePasswordVisibility('registerPassword')">
+            <label for="showPassReg">Mostrar contraseña</label>
           </div>
         <button type="submit" class="btn-auth">Registrarse</button>
       </form>
