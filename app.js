@@ -172,8 +172,8 @@ async function checkInitialSession() {
 // MOSTRAR CONTRASEÑA
 // ═══════════════════════════════════════════════════════════
 
-function togglePasswordVisibility() {
-  // Ahora sí estamos apuntando al ID correcto de tu HTML
+// Usamos window. para asegurar que el HTML siempre la encuentre
+window.togglePasswordVisibility = function() {
   const passInput = document.getElementById('loginPassword');
   
   if (passInput) {
@@ -183,7 +183,7 @@ function togglePasswordVisibility() {
       passInput.type = 'password';
     }
   }
-}
+};
 
 
 // ═══════════════════════════════════════════════════════════
