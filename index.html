@@ -22,7 +22,7 @@
     <div id="loginForm">
       <h3 class="auth-title">Iniciar Sesión</h3>
       <form class="auth-form" onsubmit="handleLogin(event)">
-        <input type="email" id="loginEmail" class="auth-input" placeholder="Tu email" required autocomplete="email"/>
+        <input type="text" id="loginIdentifier" class="auth-input" placeholder="Email o Nombre de usuario" required autocomplete="username"/>
         <input type="password" id="loginPassword" class="auth-input" placeholder="Tu contraseña" required autocomplete="current-password" minlength="6"/>
           <div class="password-toggle">
             <input type="checkbox" id="showPassLogin" onchange="togglePasswordVisibility('loginPassword')">
