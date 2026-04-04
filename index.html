@@ -36,6 +36,8 @@
     <div id="registerForm" style="display:none;">
       <h3 class="auth-title">Crear Cuenta</h3>
       <form class="auth-form" onsubmit="handleRegister(event)">
+        <input type="text" id="registerUsername" class="auth-input" placeholder="Nombre de usuario (ej. ninja_99)" required pattern="^[a-zA-Z0-9_]{3,16}$" title="De 3 a 16 caracteres. Solo letras, números y guiones bajos (_). Sin espacios."/>
+        
         <input type="email" id="registerEmail" class="auth-input" placeholder="Tu email" required autocomplete="email"/>
         <input type="password" id="registerPassword" class="auth-input" placeholder="Contraseña (mín. 6 caracteres)" required autocomplete="new-password" minlength="6"/>
           <div class="password-toggle">
@@ -58,6 +60,10 @@
     <button class="tab-btn" onclick="switchView('kanban',this)">🗂 Kanban</button>
   </div>
   <div class="header-actions">
+    <div class="user-badge" id="userBadge" style="display: none;">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <span class="user-name" id="userNameDisplay">@usuario</span>
+    </div>
     <select id="themeSelect" class="btn-sm" onchange="changeTheme(this.value)" style="background: var(--surface); color: var(--text);">
       <option value="legacy">Tema: Oscuro (Original)</option>
       <option value="soft">Tema: Noche Suave</option>
