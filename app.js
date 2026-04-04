@@ -167,6 +167,23 @@ async function checkInitialSession() {
   else showAuth();
 }
 
+
+// ═══════════════════════════════════════════════════════════
+// MOSTRAR CONTRASEÑA
+// ═══════════════════════════════════════════════════════════
+
+function togglePasswordVisibility() {
+  const passInput = document.getElementById('authPass');
+  
+  // Si está oculta, la mostramos. Si está visible, la ocultamos.
+  if (passInput.type === 'password') {
+    passInput.type = 'text';
+  } else {
+    passInput.type = 'password';
+  }
+}
+
+
 // ═══════════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════════
