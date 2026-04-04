@@ -105,6 +105,9 @@ function showApp(user) {
   document.getElementById('appMain').style.display = 'block';
   updateDaySelect();
   loadAndRender();
+
+  // NUEVO: Cargar y mostrar el perfil
+  loadProfile(user);
   
   // CAMBIO: Comprobación de seguridad para navegadores móviles
   if ('Notification' in window && Notification.permission === 'granted' && notifsActive) {
@@ -145,7 +148,17 @@ async function handleRegister(e) {
   try {
     const email    = document.getElementById('registerEmail').value.trim();
     const password = document.getElementById('registerPassword').value;
-    const { error } = await _supabase.auth.signUp({ email, password });
+    const username = document.getElementById('registerUsername').value.trim(); // NUEVO
+
+    // Le pasamos el username a Supabase en los "metadatos"
+    const { error } = await _supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        data: { username: username }
+      }
+    });
+    
     if (error) throw error;
     showToast('¡Registro exitoso! Revisa tu email para confirmar.', 'success');
     toggleAuthForms();
@@ -167,6 +180,31 @@ async function checkInitialSession() {
   else showAuth();
 }
 
+// ═══════════════════════════════════════════════════════════
+// PERFIL DE USUARIO
+// ═══════════════════════════════════════════════════════════
+
+async function loadProfile(user) {
+  try {
+    // Usamos el cliente de Supabase para leer la tabla pública de perfiles
+    const { data, error } = await _supabase
+      .from('perfiles')
+      .select('username')
+      .eq('id', user.id)
+      .single();
+
+    if (data && data.username) {
+      // Ponemos el nombre con una @
+      document.getElementById('userNameDisplay').textContent = '@' + data.username;
+      // Tomamos la primera letra para el círculo y la hacemos mayúscula
+      document.getElementById('userAvatar').textContent = data.username.charAt(0).toUpperCase();
+      // Mostramos la insignia
+      document.getElementById('userBadge').style.display = 'flex';
+    }
+  } catch (err) {
+    console.error('Error cargando el perfil:', err);
+  }
+}
 
 // ═══════════════════════════════════════════════════════════
 // MOSTRAR CONTRASEÑA
