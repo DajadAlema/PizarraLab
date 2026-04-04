@@ -350,7 +350,30 @@ main { padding: 24px 28px; }
   box-shadow: 0 0 10px rgba(107, 203, 119, 0.3); /* Resplandor verde */
 }
 
-.task-text { font-size: 0.88rem; line-height: 1.5; flex: 1; word-break: break-word; color: #f2f2f2; }
+/* Limitar el texto a 2 líneas para que no rompa el diseño */
+.task-text {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  flex: 1;
+  word-break: break-word;
+  color: var(--text);
+  
+  /* Magia del Line Clamping */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Número máximo de líneas visibles */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  /* Transición suave al expandirse */
+  transition: all 0.3s ease;
+}
+
+/* Al pasar el mouse (o mantener presionado en celular), se muestra todo */
+.task-card:hover .task-text,
+.task-card:active .task-text {
+  -webkit-line-clamp: unset; /* Quita el límite de líneas */
+}
 .task-del {
   opacity: 0;
   background: none; border: none;
