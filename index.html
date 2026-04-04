@@ -24,6 +24,10 @@
       <form class="auth-form" onsubmit="handleLogin(event)">
         <input type="email" id="loginEmail" class="auth-input" placeholder="Tu email" required autocomplete="email"/>
         <input type="password" id="loginPassword" class="auth-input" placeholder="Tu contraseña" required autocomplete="current-password" minlength="6"/>
+          <div class="password-toggle">
+            <input type="checkbox" id="showPassCheck" onchange="togglePasswordVisibility()">
+            <label for="showPassCheck">Mostrar contraseña</label>
+          </div>
         <button type="submit" class="btn-auth">Entrar</button>
       </form>
       <div class="auth-switch">¿No tienes cuenta? <a onclick="toggleAuthForms()">Regístrate</a></div>
@@ -34,6 +38,10 @@
       <form class="auth-form" onsubmit="handleRegister(event)">
         <input type="email" id="registerEmail" class="auth-input" placeholder="Tu email" required autocomplete="email"/>
         <input type="password" id="registerPassword" class="auth-input" placeholder="Contraseña (mín. 6 caracteres)" required autocomplete="new-password" minlength="6"/>
+          <div class="password-toggle">
+            <input type="checkbox" id="showPassCheck" onchange="togglePasswordVisibility()">
+            <label for="showPassCheck">Mostrar contraseña</label>
+          </div>
         <button type="submit" class="btn-auth">Registrarse</button>
       </form>
       <div class="auth-switch">¿Ya tienes cuenta? <a onclick="toggleAuthForms()">Inicia sesión</a></div>
