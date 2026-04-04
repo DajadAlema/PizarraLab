@@ -82,7 +82,7 @@
     <input type="text" id="taskInput" placeholder="Nueva tarea…" maxlength="200" onkeydown="if(event.key==='Enter') addTask()"/>
     <input type="time" id="timeInput" title="Hora de la tarea (opcional)"/>
     <select id="alertSelect" title="¿Cuándo avisar?">
-      <option value="-1">Sin notificación</option> <option value="0">A la hora</option>
+      <option value="-1">Sin notificación</option>
       <option value="0">A la hora</option>
       <option value="15" selected>15 min antes</option>
       <option value="30">30 min antes</option>
@@ -141,11 +141,12 @@
         <input type="text" id="modalInput" placeholder="Nueva tarea…" maxlength="200" onkeydown="if(event.key==='Enter') addTaskFromModal()"/>
         <input type="time" id="modalTimeInput" title="Hora (opcional)"/>
         <select id="modalAlertSelect" title="¿Cuándo avisar?">
-      <option value="0">A la hora</option>
-      <option value="15" selected>15 min antes</option>
-      <option value="30">30 min antes</option>
-      <option value="60">1 hora antes</option>
-    </select>
+          <option value="-1">Sin notificación</option>
+          <option value="0">A la hora</option>
+          <option value="15" selected>15 min antes</option>
+          <option value="30">30 min antes</option>
+          <option value="60">1 hora antes</option>
+        </select>
         <button class="btn-modal" onclick="addTaskFromModal()">+ Añadir</button>
       </div>
     </div>
@@ -203,6 +204,7 @@
             </select>
           </div>
           <select id="editAlert" class="auth-input">
+            <option value="-1">Sin notificación</option>
             <option value="0">Avisar a la hora</option>
             <option value="15">Avisar 15 min antes</option>
             <option value="30">Avisar 30 min antes</option>
