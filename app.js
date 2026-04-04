@@ -210,9 +210,9 @@ async function loadProfile(user) {
 // MOSTRAR CONTRASEÑA
 // ═══════════════════════════════════════════════════════════
 
-// Usamos window. para asegurar que el HTML siempre la encuentre
-window.togglePasswordVisibility = function() {
-  const passInput = document.getElementById('loginPassword');
+window.togglePasswordVisibility = function(targetId) {
+  // Ahora busca el ID que le mandamos desde el HTML
+  const passInput = document.getElementById(targetId);
   
   if (passInput) {
     if (passInput.type === 'password') {
@@ -222,7 +222,6 @@ window.togglePasswordVisibility = function() {
     }
   }
 };
-
 
 // ═══════════════════════════════════════════════════════════
 // DATA
