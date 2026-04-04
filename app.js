@@ -173,13 +173,15 @@ async function checkInitialSession() {
 // ═══════════════════════════════════════════════════════════
 
 function togglePasswordVisibility() {
-  const passInput = document.getElementById('authPass');
+  // Ahora sí estamos apuntando al ID correcto de tu HTML
+  const passInput = document.getElementById('loginPassword');
   
-  // Si está oculta, la mostramos. Si está visible, la ocultamos.
-  if (passInput.type === 'password') {
-    passInput.type = 'text';
-  } else {
-    passInput.type = 'password';
+  if (passInput) {
+    if (passInput.type === 'password') {
+      passInput.type = 'text';
+    } else {
+      passInput.type = 'password';
+    }
   }
 }
 
