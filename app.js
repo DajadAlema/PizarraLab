@@ -129,8 +129,23 @@ async function handleLogin(e) {
   const btn = e.target.querySelector('[type="submit"]');
   btn.textContent = '...'; btn.disabled = true;
   try {
-    const email    = document.getElementById('loginEmail').value.trim();
+    let identifier = document.getElementById('loginIdentifier').value.trim();
     const password = document.getElementById('loginPassword').value;
+    let email = identifier; // Asumimos por defecto que escribió un correo
+
+    // Magia: Si no tiene '@', asumimos que es un username
+    if (!identifier.includes('@')) {
+      // Llamamos a nuestro "Traductor" en Supabase
+      const { data, error } = await _supabase.rpc('get_email_por_username', { nombre_usuario: identifier });
+      
+      // Si no nos devuelve nada, el usuario no existe
+      if (error || !data) {
+        throw new Error('Nombre de usuario no encontrado');
+      }
+      email = data; // Reemplazamos el username por el correo real oculto
+    }
+
+    // Iniciamos sesión normalmente usando el correo final
     const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     showApp(data.user);
