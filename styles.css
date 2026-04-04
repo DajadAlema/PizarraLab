@@ -259,6 +259,10 @@ main { padding: 24px 28px; }
   padding: 6px;
   cursor: pointer;
   transition: var(--t);
+  
+  /* NUEVO: La magia para que no se rompa la cuadrícula */
+  min-width: 0;         /* Evita que CSS Grid se estire a lo ancho */
+  overflow: hidden;     /* Oculta cualquier cosa que intente salirse */
 }
 .month-day:hover { border-color: #3a3a3a; background: var(--surface2); }
 .month-day.today { border-color: var(--accent); }
@@ -277,6 +281,7 @@ main { padding: 24px 28px; }
 }
 .month-pills { display: flex; flex-direction: column; gap: 2px; }
 .month-pill {
+  display: block; /* Asegura que el recorte de texto funcione */
   font-size: 0.62rem; padding: 2px 5px;
   border-radius: 3px; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis;
