@@ -867,12 +867,16 @@ function activateNotifs() {
 
 function updateNotifBtn(active) {
   const btn = document.getElementById('notifBtn');
+  
+  // EL SALVAVIDAS: Si no existe el botón, no hagas nada y evita el error
+  if (!btn) return; 
+
   if (active) {
     btn.classList.add('active');
-    btn.title = 'Silenciar notificaciones';
+    btn.textContent = '🔕 Silenciar Notificaciones'; // Cambiamos el texto
   } else {
     btn.classList.remove('active');
-    btn.title = 'Activar notificaciones';
+    btn.textContent = '🔔 Notificaciones';
   }
 }
 
