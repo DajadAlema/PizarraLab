@@ -217,68 +217,74 @@
   <div class="modal-overlay" id="profileModalOverlay" onclick="closeProfileModalBg(event)">
     <div class="modal" style="width: 480px;">
       <div class="modal-header">
-        <span class="modal-title">Mi Perfil y Ajustes</span>
+        <span class="modal-title">Ajustes de Cuenta</span>
         <button class="modal-close" onclick="closeProfileModal()">&#10005;</button>
       </div>
       <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 20px;">
         
-        <div style="display: flex; gap: 16px; align-items: center;">
-          <div class="user-avatar" id="profileAvatarBig" style="width: 64px; height: 64px; font-size: 2rem;">?</div>
-          <div style="flex: 1;">
-            <label class="stat-label">Nombre de usuario</label>
-            <input type="text" id="profileUsername" class="auth-input" style="width: 100%; margin-top: 4px;" pattern="^[a-zA-Z0-9_]{3,16}$"/>
-          </div>
-        </div>
-        
         <div>
-          <label class="stat-label">Biografía</label>
-          <input type="text" id="profileBio" class="auth-input" style="width: 100%; margin-top: 4px;" placeholder="Ej. Desarrollador Web, Estudiante..."/>
-        </div>
-
-        <div class="stat-divider" style="width: 100%; height: 1px;"></div>
-
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <div style="flex: 1; min-width: 180px;">
-            <label class="stat-label">Tema Visual</label>
-            <select id="profileTheme" class="auth-input" style="width: 100%; margin-top: 4px;">
-              <option value="legacy">Oscuro (Original)</option>
-              <option value="soft">Noche Suave</option>
-              <option value="sakura">Sakura 🌸</option>
-            </select>
+          <label class="stat-label" style="display: block; margin-bottom: 10px; font-size: 0.85rem; color: var(--accent);">Perfil Público</label>
+          <div style="display: flex; gap: 16px; align-items: center;">
+            <div class="user-avatar" id="profileAvatarBig" style="width: 64px; height: 64px; font-size: 2rem;">?</div>
+            <div style="flex: 1;">
+              <label class="stat-label">Nombre de usuario</label>
+              <input type="text" id="profileUsername" class="auth-input" style="width: 100%; margin-top: 4px;" pattern="^[a-zA-Z0-9_]{3,16}$"/>
+            </div>
           </div>
-          <div style="flex: 1; min-width: 180px;">
-            <label class="stat-label">Alerta por defecto</label>
-            <select id="profileDefaultAlert" class="auth-input" style="width: 100%; margin-top: 4px;">
-              <option value="-1">Sin notificación</option>
-              <option value="0">A la hora</option>
-              <option value="15">15 min antes</option>
-              <option value="30">30 min antes</option>
-              <option value="60">1 hora antes</option>
-            </select>
+          <div style="margin-top: 10px;">
+            <label class="stat-label">Biografía</label>
+            <input type="text" id="profileBio" class="auth-input" style="width: 100%; margin-top: 4px;" placeholder="Ej. Desarrollador Web, Estudiante..."/>
           </div>
         </div>
 
         <div class="stat-divider" style="width: 100%; height: 1px;"></div>
 
         <div>
-          <label class="stat-label" style="display: block; margin-bottom: 10px;">Herramientas del sistema</label>
-          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-            <button class="btn-sm" id="modalNotifBtn" onclick="toggleNotifications()">🔔 Notificaciones</button>
-            <button class="btn-sm" onclick="exportICS()" style="border-color: var(--blue); color: var(--blue);">Sincronizar Calendario</button>
-            <button class="btn-sm" onclick="exportData()">Exportar JSON</button>
+          <label class="stat-label" style="display: block; margin-bottom: 10px; font-size: 0.85rem; color: var(--accent);">Preferencias</label>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 180px;">
+              <label class="stat-label">Tema Visual</label>
+              <select id="profileTheme" class="auth-input" style="width: 100%; margin-top: 4px;">
+                <option value="legacy">Oscuro (Original)</option>
+                <option value="soft">Noche Suave</option>
+                <option value="sakura">Sakura 🌸</option>
+              </select>
+            </div>
+            <div style="flex: 1; min-width: 180px;">
+              <label class="stat-label">Alerta por defecto</label>
+              <select id="profileDefaultAlert" class="auth-input" style="width: 100%; margin-top: 4px;">
+                <option value="-1">Sin notificación</option>
+                <option value="0">A la hora</option>
+                <option value="15">15 min antes</option>
+                <option value="30">30 min antes</option>
+                <option value="60">1 hora antes</option>
+              </select>
+            </div>
           </div>
         </div>
 
         <div class="stat-divider" style="width: 100%; height: 1px;"></div>
 
-        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+           <label class="stat-label" style="display: block; margin-bottom: 10px; font-size: 0.85rem; color: var(--accent);">Seguridad</label>
+           <div style="margin-bottom: 10px;">
+              <label class="stat-label">Correo Electrónico (Solo lectura por seguridad)</label>
+              <input type="email" id="profileEmail" class="auth-input" style="width: 100%; margin-top: 4px; opacity: 0.6; cursor: not-allowed;" disabled/>
+           </div>
+           <div>
+              <label class="stat-label">Nueva Contraseña (Opcional)</label>
+              <input type="password" id="profileNewPassword" class="auth-input" style="width: 100%; margin-top: 4px;" placeholder="Dejar en blanco para no cambiar" minlength="6"/>
+           </div>
+        </div>
+
+        <div class="stat-divider" style="width: 100%; height: 1px;"></div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
           <div style="font-size: 0.75rem; color: var(--muted); font-family: var(--font-mono);" id="profileStats">
             Miembro desde: ... <br> Tareas hechas: ...
           </div>
-          <button class="btn-sm btn-logout" onclick="handleLogout()">Salir de la cuenta</button>
+          <button class="btn-auth" id="saveProfileBtn" onclick="saveProfile()" style="width: auto; padding: 10px 24px;">Guardar Cambios</button>
         </div>
-
-        <button class="btn-auth" id="saveProfileBtn" onclick="saveProfile()" style="margin-top: 4px;">Guardar Cambios</button>
 
       </div>
     </div>
