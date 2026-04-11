@@ -216,6 +216,11 @@ async function loadProfile(user) {
       // Mostramos la insignia
       document.getElementById('userBadge').style.display = 'flex';
 
+      // NUEVO: Llenamos los datos del Menú Lateral
+      document.getElementById('sidebarUsername').textContent = '@' + data.username;
+      document.getElementById('sidebarEmail').textContent = user.email; // Tomamos el correo directo de Supabase
+      document.getElementById('sidebarAvatar').textContent = data.username.charAt(0).toUpperCase();
+      
       // Aplicamos el tema guardado en la nube
       if (data.theme_preference) changeTheme(data.theme_preference);
     }
@@ -314,6 +319,36 @@ async function saveProfile() {
     btn.textContent = 'Guardar Cambios'; btn.disabled = false;
   }
 }
+
+// ═══════════════════════════════════════════════════════════
+// SIDEBAR (MENÚ LATERAL)
+// ═══════════════════════════════════════════════════════════
+// 11/04/2026  avbx4ch2
+
+function openSidebar() {
+  if (!currentUser) return;
+  document.getElementById('sidebarOverlay').classList.add('open');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// Cierra el menú si haces clic afuera de él (en la zona oscura)
+function closeSidebarBg(e) {
+  if (e.target === document.getElementById('sidebarOverlay')) {
+    closeSidebar();
+  }
+}
+
+// Abre los ajustes detallados y cierra el menú lateral para que no se encimen
+function openProfileModalFromSidebar() {
+  closeSidebar();
+  setTimeout(() => {
+    openProfileModal();
+  }, 300); // Esperamos 300ms a que termine la animación del menú lateral
+}
+
 
 // ═══════════════════════════════════════════════════════════
 // MOSTRAR CONTRASEÑA
