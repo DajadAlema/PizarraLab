@@ -201,28 +201,31 @@ async function checkInitialSession() {
 
 async function loadProfile(user) {
   try {
-    // Usamos el cliente de Supabase para leer la tabla pública de perfiles
     const { data, error } = await _supabase
       .from('perfiles')
-      .select('username')
+      // CAMBIO 1: Le pedimos a la base de datos que también traiga alerta_default
+      .select('username, theme_preference, alerta_default') 
       .eq('id', user.id)
       .single();
 
     if (data && data.username) {
-      // Ponemos el nombre con una @
       document.getElementById('userNameDisplay').textContent = '@' + data.username;
-      // Tomamos la primera letra para el círculo y la hacemos mayúscula
       document.getElementById('userAvatar').textContent = data.username.charAt(0).toUpperCase();
-      // Mostramos la insignia
       document.getElementById('userBadge').style.display = 'flex';
 
-      // NUEVO: Llenamos los datos del Menú Lateral
       document.getElementById('sidebarUsername').textContent = '@' + data.username;
-      document.getElementById('sidebarEmail').textContent = user.email; // Tomamos el correo directo de Supabase
+      document.getElementById('sidebarEmail').textContent = user.email;
       document.getElementById('sidebarAvatar').textContent = data.username.charAt(0).toUpperCase();
       
-      // Aplicamos el tema guardado en la nube
       if (data.theme_preference) changeTheme(data.theme_preference);
+
+      // CAMBIO 2: Aplicamos tu configuración a la barra principal de tareas
+      if (data.alerta_default !== null && data.alerta_default !== undefined) {
+        const mainAlertSelect = document.getElementById('alertSelect');
+        if (mainAlertSelect) {
+          mainAlertSelect.value = data.alerta_default;
+        }
+      }
     }
   } catch (err) {
     console.error('Error cargando el perfil:', err);
