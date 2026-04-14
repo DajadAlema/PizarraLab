@@ -341,6 +341,34 @@ async function saveProfile() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// ESTADÍSTICAS (GAMIFICACIÓN)
+// ═══════════════════════════════════════════════════════════
+
+async function incrementCompletedTasks() {
+  if (!currentUser) return;
+  try {
+    // 1. Consultar cuántas tareas tiene el usuario actualmente
+    const { data } = await _supabase
+      .from('perfiles')
+      .select('tareas_completadas')
+      .eq('id', currentUser.id)
+      .single();
+
+    const currentCount = data?.tareas_completadas || 0;
+
+    // 2. Sumarle 1 y actualizar la base de datos en silencio
+    await _supabase
+      .from('perfiles')
+      .update({ tareas_completadas: currentCount + 1 })
+      .eq('id', currentUser.id);
+
+  } catch (err) {
+    console.error('Error actualizando estadísticas:', err);
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════
 // SIDEBAR (MENÚ LATERAL)
 // ═══════════════════════════════════════════════════════════
 // 11/04/2026  avbx4ch2
@@ -457,17 +485,25 @@ async function toggleDone(id) {
   const t = tasks.find(t => t.id == id); if (!t) return;
   const newDone   = !t.done;
   const newStatus = newDone ? 'done' : (t.status === 'done' ? 'todo' : t.status);
-  // Optimistic update
+  
+  // Optimistic update (cambia en pantalla de inmediato)
   t.done = newDone; t.status = newStatus;
   renderAll(); if (modalDay) renderModalBody();
+  
   try {
     await apiFetch(`/api/tasks/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ done: newDone, status: newStatus })
     });
+    
+    // NUEVO: Si la tarea se acaba de marcar como hecha, sumamos un punto a tu perfil
+    if (newDone) {
+      incrementCompletedTasks();
+    }
+    
   } catch (err) {
     showToast('Error sincronizando: ' + err.message, 'error');
-    await loadAndRender(); // rollback
+    await loadAndRender(); // rollback si falla
   }
 }
 
