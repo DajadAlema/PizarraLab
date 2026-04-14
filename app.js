@@ -282,16 +282,27 @@ function closeProfileModalBg(e) {
 // Guardar los cambios en la base de datos
 async function saveProfile() {
   const btn = document.getElementById('saveProfileBtn');
+  const originalText = btn.textContent;
   btn.textContent = 'Guardando...'; btn.disabled = true;
 
   const newUsername = document.getElementById('profileUsername').value.trim();
-  const newBio = document.getElementById('profileBio').value.trim();
-  const newTheme = document.getElementById('profileTheme').value;
-  const newAlert = parseInt(document.getElementById('profileDefaultAlert').value);
+  const newBio      = document.getElementById('profileBio').value.trim();
+  const newTheme    = document.getElementById('profileTheme').value;
+  const newAlert    = parseInt(document.getElementById('profileDefaultAlert').value);
+  const newPassword = document.getElementById('profileNewPassword').value; // NUEVO
 
   try {
-    // Enviamos los datos actualizados a Supabase
-    const { error } = await _supabase
+    // A. Si el usuario escribió una nueva contraseña, la actualizamos primero
+    if (newPassword && newPassword.length >= 6) {
+      const { error: authError } = await _supabase.auth.updateUser({ password: newPassword });
+      if (authError) throw authError;
+      showToast('¡Contraseña actualizada!', 'success');
+    } else if (newPassword && newPassword.length < 6) {
+      throw new Error('La contraseña debe tener al menos 6 caracteres');
+    }
+
+    // B. Actualizamos los datos del perfil (username, bio, etc.)
+    const { error: profileError } = await _supabase
       .from('perfiles')
       .update({
         username: newUsername,
@@ -301,29 +312,28 @@ async function saveProfile() {
       })
       .eq('id', currentUser.id);
 
-    if (error) throw error;
+    if (profileError) throw profileError;
 
+    // C. Aplicar cambios visuales inmediatos
     showToast('Perfil actualizado correctamente', 'success');
-    
-    // Aplicamos los cambios visuales de inmediato sin recargar la página
     changeTheme(newTheme); 
     
-    // Actualizamos las iniciales e insignias
-    document.getElementById('userNameDisplay').textContent = '@' + newUsername;
+    // Actualizar insignias y menú lateral
     const initial = newUsername.charAt(0).toUpperCase();
+    document.getElementById('userNameDisplay').textContent = '@' + newUsername;
     document.getElementById('userAvatar').textContent = initial;
-    document.getElementById('profileAvatarBig').textContent = initial;
+    document.getElementById('sidebarUsername').textContent = '@' + newUsername;
+    document.getElementById('sidebarAvatar').textContent = initial;
 
     closeProfileModal();
   } catch (err) {
-    // Si alguien más ya tiene ese nombre de usuario, la base de datos nos avisa (unique constraint)
     if (err.message.includes('unique constraint')) {
       showToast('Ese nombre de usuario ya está ocupado', 'error');
     } else {
-      showToast('Error al guardar: ' + err.message, 'error');
+      showToast('Error: ' + err.message, 'error');
     }
   } finally {
-    btn.textContent = 'Guardar Cambios'; btn.disabled = false;
+    btn.textContent = originalText; btn.disabled = false;
   }
 }
 
