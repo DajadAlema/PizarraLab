@@ -551,15 +551,35 @@ async function drop(e, target, ctx) {
   e.preventDefault(); e.currentTarget.classList.remove('drag-over');
   if (dragId === null) return;
   const t = tasks.find(t => t.id == dragId); if (!t) return;
+  
   let fields = {};
-  if (ctx === 'weekly') { t.day = target; fields = { day: target }; }
-  else { t.status = target; t.done = target === 'done'; fields = { status: target, done: t.done }; }
-  renderAll();
+  
+  // Guardamos el estado anterior para saber si estaba hecha o no
+  const wasDone = t.done; 
+  
+  if (ctx === 'weekly') { 
+    t.day = target; 
+    fields = { day: target }; 
+  }
+  else { 
+    t.status = target; 
+    t.done = target === 'done'; 
+    fields = { status: target, done: t.done }; 
+  }
+  
+  renderAll(); // Actualización visual
+  
   try {
     await apiFetch(`/api/tasks/${dragId}`, { method: 'PUT', body: JSON.stringify(fields) });
+    
+    // NUEVO: Si no estaba hecha y ahora la soltaron en "done", sumamos un punto
+    if (!wasDone && t.done) {
+      incrementCompletedTasks();
+    }
+    
   } catch (err) {
     showToast('Error moviendo tarea: ' + err.message, 'error');
-    await loadAndRender();
+    await loadAndRender(); // Revertimos si falla la base de datos
   }
 }
 
