@@ -247,6 +247,13 @@ async function openProfileModal() {
       document.getElementById('profileBio').value = data.bio || '';
       document.getElementById('profileTheme').value = data.theme_preference || 'legacy';
       document.getElementById('profileDefaultAlert').value = data.alerta_default !== null ? data.alerta_default : 15;
+
+      //avbx4ch2  14/04/2026
+      // NUEVO: Mostrar el email del usuario actual (currentUser viene de Auth)
+      document.getElementById('profileEmail').value = currentUser.email;
+      
+      // Limpiamos el campo de contraseña por si acaso se quedó algo de antes
+      document.getElementById('profileNewPassword').value = '';
       
       // Actualizamos la inicial grande
       document.getElementById('profileAvatarBig').textContent = (data.username || '?').charAt(0).toUpperCase();
