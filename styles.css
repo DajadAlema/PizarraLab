@@ -78,6 +78,24 @@ body[data-theme="amoled"] {
   --accent2: #ff1744;      
 }
 
+/* Tema: Gris y Marino ⚓ */
+body[data-theme="navy-gray"] {
+  --bg: #2b2d31;           /* Gris oscuro base */
+  --surface: #313338;      /* Gris ligeramente más claro para los paneles */
+  --surface2: #383a40;     /* Gris para los botones y hover */
+  --border: #4a4d53;       /* Bordes definidos pero sutiles */
+  
+  --text: #f2f3f5;         /* Blanco suave para lectura cómoda */
+  --muted: #a3a6aa;        /* Texto secundario en gris claro */
+  
+  --accent: #2563eb;       /* Azul marino vibrante para destacar */
+  --accent-hover: #1d4ed8; /* Azul marino profundo para cuando pasas el mouse */
+  
+  --blue: #3b82f6;
+  --green: #16a34a;        /* Verde más sobrio para mantener la elegancia */
+  --accent2: #ef4444;      /* Rojo clásico para urgencias */
+}
+
 /* Ajustes específicos para que Sakura (que es un tema claro) se lea perfecto */
 body[data-theme="sakura"] .task-text,
 body[data-theme="sakura"] .auth-input,
