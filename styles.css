@@ -51,9 +51,16 @@ body[data-theme="sakura"] {
   --blue:      #87cefa; /* Azul cielo despejado */
   --purple:    #dda0dd; /* Ciruela claro */
   --radius:    12px;    /* Extra redondeado para suavidad */
+   
+  /* Toque especial: Degradado primaveral en el fondo */
+  background-image: 
+    radial-gradient(circle at 10% 20%, #ffe4e1 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, #ffc0cb 0%, transparent 40%);
+  background-attachment: fixed;
+}
 
-   /* Tema: OLED Profundo 🌌 */
-[data-theme="amoled"] {
+   /* Tema: negro Profundo 🌌 */
+body[data-theme="amoled"] {
   --bg: #000000;           /* Negro puro (apaga los píxeles en pantallas OLED) */
   --surface: #0a0a0a;      /* Gris casi imperceptible para diferenciar paneles */
   --surface2: #141414;     /* Gris muy oscuro para botones y tarjetas */
@@ -67,13 +74,6 @@ body[data-theme="sakura"] {
   --blue: #29b6f6;
   --green: #00e676;        /* Verde más brillante para las palomitas ✅ */
   --accent2: #ff1744;      /* Rojo neón para tareas urgentes */
-}
-   
-  /* Toque especial: Degradado primaveral en el fondo */
-  background-image: 
-    radial-gradient(circle at 10% 20%, #ffe4e1 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, #ffc0cb 0%, transparent 40%);
-  background-attachment: fixed;
 }
 
 /* Ajustes específicos para que Sakura (que es un tema claro) se lea perfecto */
