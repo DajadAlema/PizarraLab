@@ -6,7 +6,7 @@
  * 2. Manejar notificaciones push (cuando la app está cerrada)
  */
 
-const CACHE_NAME = 'pizarralab-v2.6.8.3-NewTheme';
+const CACHE_NAME = 'pizarralab-v2.6.8.4-NewTheme';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
